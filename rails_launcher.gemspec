@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "rails_launcher"
   gem.require_paths = ["lib"]
   gem.version       = RailsLauncher::VERSION
+
+  gem.add_development_dependency 'rspec', '~> 2.11.0'
 end
