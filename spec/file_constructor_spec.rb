@@ -12,6 +12,14 @@ describe RailsLauncher::FileConstructor do
     end
   end
 
+  let(:has_one) do
+    RailsLauncher::DSL.new_world_block do
+      model(:user) { string 'user_name' }
+      model(:blog) { string 'title' }
+      user.has_one blog
+    end
+  end
+
   describe 'files for the simple world' do
     subject(:constructor) { described_class.new(simple_world) }
 
@@ -48,9 +56,31 @@ end
 RUBY
     end
 
+    it 'should create Post migration file' do
+      content_of_file('db/migrate/\d\d\d_create_posts.rb').should match /t.string :title/
+    end
+
     it 'should have migration files for posts and users tables' do
       content_of_file('db/migrate/\d\d\d_create_users.rb').should_not be_empty
       content_of_file('db/migrate/\d\d\d_create_posts.rb').should_not be_empty
+    end
+  end
+
+  describe 'files for has_one relationship' do
+    subject { described_class.new(has_one) }
+
+    specify 'User model file should contain has_one' do
+      expect(content_of_file('app/models/user.rb')).to match(/^\s*has_one :blog$/)
+    end
+
+    specify 'Blog model should contain belongs to user' do
+      expect(content_of_file('app/models/blog.rb')).to match(/^\s*belongs_to :user$/)
+    end
+
+    specify 'blogs migration should contain user reference and index for it' do
+      migration = content_of_file('db/migrate/\d\d\d_create_blogs.rb')
+      expect(migration).to match(/^\s*t.references :user$/)
+      expect(migration).to match(/^\s*add_index :blogs :user_id$/)
     end
   end
 

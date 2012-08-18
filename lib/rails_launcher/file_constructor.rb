@@ -58,7 +58,7 @@ module RailsLauncher
         <<RUBY
 class #{Infl.camelize @model.name}
   attr_accessor #{properties.map(&:inspect).join(', ')}
-end
+#{ relations }end
 RUBY
       end
 
@@ -66,6 +66,10 @@ RUBY
 
       def properties
         @model.fields.map { |t| t[1].to_sym }
+      end
+
+      def relations
+        @model.relations.map { |r| '  ' + r[0] + ' ' + r[1].inspect + "\n" }.join
       end
     end
 
@@ -83,10 +87,10 @@ RUBY
 class Create#{class_table_name} < ActiveRecord::Migration
   def change
     create_table :#{table_name} do |t|
-      t.string :user_name
+#{ columns }
       t.timestamps
     end
-  end
+#{ indices }  end
 end
 RUBY
       end
@@ -98,6 +102,21 @@ RUBY
 
       def class_table_name
         Infl.pluralize(Infl.classify(@model.name))
+      end
+
+      def columns
+        base = @model.fields.map { |f| ' ' * 6 + "t.#{f[0]} :#{f[1]}" }.join "\n"
+
+        base += belonging_relations.map { |rel| "\n      t.references :#{rel[1]}" }.join ''
+      end
+
+      def indices
+        belonging_relations.map { |rel| "    add_index :#{table_name} :#{rel[1]}_id\n" }.join ''
+      end
+
+      def belonging_relations
+        @belonging_relations ||=
+          @model.relations.select { |rel| rel[0] == 'belongs_to' }
       end
     end
   end
