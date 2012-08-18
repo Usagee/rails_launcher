@@ -6,12 +6,6 @@ module RailsLauncher
       w
     end
 
-    def self.new_world_block(&block)
-      w = World.new
-      w.instance_eval(&block)
-      w
-    end
-
     class World
       attr_reader :models
 

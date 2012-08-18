@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tmpdir'
 
 describe RailsLauncher::Generator do
-  let(:simple_world_path) { File.expand_path('../sample_worlds/simple.rb', __FILE__) }
+  let(:simple_world_path) { sample_path('simple') }
   let(:tempdir) { Dir.mktmpdir }
 
   before do

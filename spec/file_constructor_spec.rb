@@ -1,27 +1,11 @@
 require 'spec_helper'
 
 describe RailsLauncher::FileConstructor do
-  let(:simple_world) do
-    RailsLauncher::DSL.new_world_block { model(:user) { string 'user_name' } }
-  end
-
-  let(:two_models) do
-    RailsLauncher::DSL.new_world_block do
-      model(:user) { string 'user_name' }
-      model(:post) { string 'title' }
-    end
-  end
-
-  let(:has_one) do
-    RailsLauncher::DSL.new_world_block do
-      model(:user) { string 'user_name' }
-      model(:blog) { string 'title' }
-      user.has_one blog
-    end
-  end
+  let(:world) { sample_world(world_name) }
+  subject(:constructor) { described_class.new(world) }
 
   describe 'files for the simple world' do
-    subject(:constructor) { described_class.new(simple_world) }
+    let(:world_name) { 'simple' }
 
     it 'should create User model file' do
       expect(content_of_file('app/models/user.rb')).to eq <<RUBY
@@ -46,7 +30,7 @@ RUBY
   end
 
   describe 'files for simple two models without relationship' do
-    subject(:constructor) { described_class.new(two_models) }
+    let(:world_name) { 'two_models' }
 
     it 'should create Post model file' do
       expect(content_of_file('app/models/post.rb')).to eq <<RUBY
@@ -67,7 +51,7 @@ RUBY
   end
 
   describe 'files for has_one relationship' do
-    subject { described_class.new(has_one) }
+    let(:world_name) { 'has_one' }
 
     specify 'User model file should contain has_one' do
       expect(content_of_file('app/models/user.rb')).to match(/^\s*has_one :blog$/)

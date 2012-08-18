@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe RailsLauncher::DSL do
   describe 'world with single model' do
-    subject(:world) { RailsLauncher::DSL.new_world_block { model(:user) { string 'user_name' } } }
+    subject(:world) { sample_world('simple') }
 
     it { should have(1).models }
 
@@ -12,13 +12,7 @@ describe RailsLauncher::DSL do
   end
 
   describe 'two models with has_one relationship' do
-    subject(:world) do
-      RailsLauncher::DSL.new_world_block do
-        model(:user) { string 'user_name' }
-        model(:blog) { string 'title' }
-        user.has_one blog
-      end
-    end
+    subject(:world) { sample_world('has_one') }
 
     it { should have(2).models }
     specify 'user model should have one blog' do
