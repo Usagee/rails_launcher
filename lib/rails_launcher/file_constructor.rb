@@ -51,7 +51,7 @@ module RailsLauncher
       def file_content
         <<RUBY
 class #{@model.name.to_s.camelize}
-  attr_accessor #{properties.map(&:inspect).join(', ')}
+  attr_accessible #{properties.map(&:inspect).join(', ')}
 #{ relations }end
 RUBY
       end
@@ -105,7 +105,7 @@ RUBY
       end
 
       def indices
-        belonging_relations.map { |rel| "    add_index :#{table_name} :#{rel[1]}_id\n" }.join ''
+        belonging_relations.map { |rel| "    add_index :#{table_name}, :#{rel[1]}_id\n" }.join ''
       end
 
       def belonging_relations

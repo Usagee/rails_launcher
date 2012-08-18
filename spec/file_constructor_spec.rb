@@ -10,7 +10,7 @@ describe RailsLauncher::FileConstructor do
     it 'should create User model file' do
       expect(content_of_file('app/models/user.rb')).to eq <<RUBY
 class User
-  attr_accessor :user_name
+  attr_accessible :user_name
 end
 RUBY
     end
@@ -35,7 +35,7 @@ RUBY
     it 'should create Post model file' do
       expect(content_of_file('app/models/post.rb')).to eq <<RUBY
 class Post
-  attr_accessor :title
+  attr_accessible :title
 end
 RUBY
     end
@@ -64,7 +64,7 @@ RUBY
     specify 'blogs migration should contain user reference and index for it' do
       migration = content_of_file('db/migrate/\d\d\d_create_blogs.rb')
       expect(migration).to match(/^\s*t.references :user$/)
-      expect(migration).to match(/^\s*add_index :blogs :user_id$/)
+      expect(migration).to match(/^\s*add_index :blogs, :user_id$/)
     end
   end
 
