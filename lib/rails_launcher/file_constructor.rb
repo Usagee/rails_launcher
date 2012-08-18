@@ -4,6 +4,7 @@ module RailsLauncher
   class FileConstructor
     def initialize(world)
       @world = world
+      @migration_id = 0
     end
 
     def file_entities
@@ -17,7 +18,7 @@ module RailsLauncher
     end
 
     def migrations
-      @world.models.map { |m| Migration.new(m) }
+      @world.models.map { |m| Migration.new(m, @migration_id += 1) }
     end
 
     class FileEntity
@@ -69,11 +70,8 @@ RUBY
     end
 
     class Migration < FileEntity
-      @@migration_id = 0
-
-      def initialize(model)
-        @id = (@@migration_id += 1)
-        @model = model
+      def initialize(model, id)
+        @model, @id = model, id
       end
 
       def path

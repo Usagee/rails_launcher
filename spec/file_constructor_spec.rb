@@ -19,7 +19,7 @@ RUBY
     end
 
     it 'should create a migration file for users table' do
-      content_of_file('db/migrate/\d\d\d_create_users.rb').should eq <<RUBY
+      content_of_file('db/migrate/001_create_users.rb').should eq <<RUBY
 class CreateUsers < ActiveRecord::Migration
   def change
     create_table :users do |t|
