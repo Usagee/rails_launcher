@@ -15,6 +15,10 @@ module RailsLauncher
         @model = model
       end
 
+      def path
+        "app/models/#{@model.name}.rb"
+      end
+
       def to_s
         <<RUBY
 class #{ActiveSupport::Inflector.camelize @model.name}
