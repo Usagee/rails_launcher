@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
+
+if ARGV.size < 2 || ! File.file?(ARGV[0])
+  puts "Usage: rails_launcher template.rb destination_directory_path"
+end
+
+# resolve bin path, ignoring symlinks
+require "pathname"
+bin_file = Pathname.new(__FILE__).realpath
+
+# add self to libpath
+$:.unshift File.expand_path("../../lib", bin_file)
+
+require "rails_launcher"
+RailsLauncher::Generator.new(ARGV[0]).generate_files(ARGV[1])
