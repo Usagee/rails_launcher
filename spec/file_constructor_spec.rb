@@ -19,5 +19,20 @@ class User
 end
 RUBY
     end
+
+    its('migrations.first.path') { should match 'db/migrate/\d\d\d_create_users.rb' }
+
+    it 'should create a migration file' do
+      constructor.migrations.first.file_content.should eq <<RUBY
+class CreateUsers < ActiveRecord::Migration
+  def change
+    create_table :users do |t|
+      t.string :user_name
+      t.timestamps
+    end
+  end
+end
+RUBY
+    end
   end
 end
