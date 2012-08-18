@@ -17,3 +17,11 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = 'random'
 end
+
+def sample_path(name)
+  File.expand_path("../sample_worlds/#{name}.rb", __FILE__)
+end
+
+def sample_world(name)
+  RailsLauncher::DSL.new_world File.read(sample_path(name))
+end
