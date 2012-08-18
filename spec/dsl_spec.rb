@@ -2,13 +2,7 @@ require 'spec_helper'
 
 describe RailsLauncher::DSL do
   describe 'world with single model' do
-    subject(:world) { RailsLauncher::DSL.new_world }
-
-    before do
-      world.instance_eval do
-        model(:user) { string 'user_name' }
-      end
-    end
+    subject(:world) { RailsLauncher::DSL.new_world_block { model(:user) { string 'user_name' } } }
 
     it { should have(1).models }
 

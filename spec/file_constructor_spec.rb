@@ -2,18 +2,14 @@ require 'spec_helper'
 
 describe RailsLauncher::FileConstructor do
   let(:simple_world) do
-    w = RailsLauncher::DSL.new_world
-    w.instance_eval { model(:user) { string 'user_name' } }
-    w
+    RailsLauncher::DSL.new_world_block { model(:user) { string 'user_name' } }
   end
 
   let(:two_models) do
-    w = RailsLauncher::DSL.new_world
-    w.instance_eval do
+    RailsLauncher::DSL.new_world_block do
       model(:user) { string 'user_name' }
       model(:post) { string 'title' }
     end
-    w
   end
 
   describe 'files for the simple world' do
