@@ -6,6 +6,12 @@ module RailsLauncher
       @world = world
     end
 
+    def file_entities
+      models + migrations
+    end
+
+    private
+
     def models
       @world.models.map { |m| Model.new(m) }
     end
@@ -14,13 +20,33 @@ module RailsLauncher
       @world.models.map { |m| Migration.new(m) }
     end
 
-    class Model
-      def initialize(model)
-        @model = model
-      end
-
+    class FileEntity
       def to_s
         path
+      end
+
+      # Relative path to rails root.
+      # Every subclass should implement this method.
+      #
+      def path
+        raise NotImplementedError
+      end
+
+      # File content in String
+      # Every subclass should implement this method.
+      #
+      def file_content
+        raise NotImplementedError
+      end
+
+      private
+       # Shortcut for ActiveSupport::Inflector, useful for name construction
+      Infl = ActiveSupport::Inflector
+   end
+
+    class Model < FileEntity
+      def initialize(model)
+        @model = model
       end
 
       def path
@@ -29,7 +55,7 @@ module RailsLauncher
 
       def file_content
         <<RUBY
-class #{ActiveSupport::Inflector.camelize @model.name}
+class #{Infl.camelize @model.name}
   attr_accessor #{properties.map(&:inspect).join(', ')}
 end
 RUBY
@@ -42,16 +68,12 @@ RUBY
       end
     end
 
-    class Migration
+    class Migration < FileEntity
       @@migration_id = 0
 
       def initialize(model)
         @id = (@@migration_id += 1)
         @model = model
-      end
-
-      def to_s
-        path
       end
 
       def path
@@ -73,11 +95,11 @@ RUBY
 
       private
       def table_name
-        ActiveSupport::Inflector.tableize(@model.name)
+        Infl.tableize(@model.name)
       end
 
       def class_table_name
-        ActiveSupport::Inflector.pluralize(ActiveSupport::Inflector.classify(@model.name))
+        Infl.pluralize(Infl.classify(@model.name))
       end
     end
   end
