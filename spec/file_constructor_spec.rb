@@ -7,6 +7,15 @@ describe RailsLauncher::FileConstructor do
     w
   end
 
+  let(:two_models) do
+    w = RailsLauncher::DSL.new_world
+    w.instance_eval do
+      model(:user) { string 'user_name' }
+      model(:post) { string 'title' }
+    end
+    w
+  end
+
   describe 'files for the simple world' do
     subject(:constructor) { described_class.new(simple_world) }
 
@@ -29,6 +38,23 @@ class CreateUsers < ActiveRecord::Migration
   end
 end
 RUBY
+    end
+  end
+
+  describe 'files for simple two models without relationship' do
+    subject(:constructor) { described_class.new(two_models) }
+
+    it 'should create Post model file' do
+      content_of_file('app/models/post.rb').should eq <<RUBY
+class Post
+  attr_accessor :title
+end
+RUBY
+    end
+
+    it 'should have migration files for posts and users tables' do
+      content_of_file('db/migrate/\d\d\d_create_users.rb').should_not be_empty
+      content_of_file('db/migrate/\d\d\d_create_posts.rb').should_not be_empty
     end
   end
 
