@@ -68,6 +68,14 @@ RUBY
     end
   end
 
+  describe 'files for has_many relationship' do
+    let(:world_name) { 'has_many' }
+
+    specify 'User model file should contain has_many' do
+      expect(content_of_file('app/models/user.rb')).to match(/^\s*has_many :posts$/)
+    end
+  end
+
   def content_of_file(path_regexp)
     matches = subject.file_entities.select { |f| f.path.match path_regexp }
     case matches.size

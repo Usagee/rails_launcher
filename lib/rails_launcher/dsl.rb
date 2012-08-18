@@ -1,3 +1,5 @@
+require 'active_support'
+
 module RailsLauncher
   module DSL
     def self.new_world(text)
@@ -20,9 +22,9 @@ module RailsLauncher
 
         eigen_class = class << self; self; end
         eigen_class.instance_eval do
-          define_method name do
-            m
-          end
+          plural_name = ActiveSupport::Inflector.pluralize(name).to_sym
+          define_method(name) { m }
+          define_method(plural_name) { m }
         end
       end
     end
@@ -44,6 +46,13 @@ module RailsLauncher
       #
       def has_one(model)
         @relations << ['has_one', model.name]
+        model.belongs_to(self)
+      end
+
+      # Add has_many relationship to the given model
+      #
+      def has_many(model)
+        @relations << ['has_many', ActiveSupport::Inflector.pluralize(model.name).to_sym]
         model.belongs_to(self)
       end
 

@@ -22,9 +22,21 @@ describe RailsLauncher::DSL do
     specify 'blog model should belong to an user' do
       expect(model(:blog).relations.first).to eq(['belongs_to', :user])
     end
+  end
 
-    def model(name)
-      world.models.find { |m| m.name == name }
+  describe 'two models with has_many relationship' do
+    subject(:world) { sample_world('has_many') }
+
+    specify 'user model should have many posts' do
+      expect(model(:user).relations.first).to eq(['has_many', :posts])
     end
+
+    specify 'post model should belongs to an user' do
+      expect(model(:post).relations.first).to eq(['belongs_to', :user])
+    end
+  end
+
+  def model(name)
+    world.models.find { |m| m.name == name }
   end
 end
