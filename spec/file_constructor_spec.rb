@@ -13,7 +13,7 @@ describe RailsLauncher::FileConstructor do
     its('models.first.path') { should == 'app/models/user.rb' }
 
     it 'should create User model file' do
-      constructor.models.first.to_s.should eq <<RUBY
+      constructor.models.first.file_content.should eq <<RUBY
 class User
   attr_accessor :user_name
 end

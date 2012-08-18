@@ -15,11 +15,15 @@ module RailsLauncher
         @model = model
       end
 
+      def to_s
+        path
+      end
+
       def path
         "app/models/#{@model.name}.rb"
       end
 
-      def to_s
+      def file_content
         <<RUBY
 class #{ActiveSupport::Inflector.camelize @model.name}
   attr_accessor #{properties.map(&:inspect).join(', ')}
