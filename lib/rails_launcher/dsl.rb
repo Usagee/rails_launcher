@@ -22,7 +22,7 @@ module RailsLauncher
 
         eigen_class = class << self; self; end
         eigen_class.instance_eval do
-          plural_name = ActiveSupport::Inflector.pluralize(name).to_sym
+          plural_name = name.to_s.pluralize.to_sym
           define_method(name) { m }
           define_method(plural_name) { m }
         end
@@ -52,7 +52,7 @@ module RailsLauncher
       # Add has_many relationship to the given model
       #
       def has_many(model)
-        @relations << ['has_many', ActiveSupport::Inflector.pluralize(model.name).to_sym]
+        @relations << ['has_many', model.name.to_s.pluralize.to_sym]
         model.belongs_to(self)
       end
 

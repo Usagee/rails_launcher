@@ -1,5 +1,3 @@
-require 'active_support'
-
 module RailsLauncher
   class FileConstructor
     def initialize(world)
@@ -39,10 +37,6 @@ module RailsLauncher
       def file_content
         raise NotImplementedError
       end
-
-      private
-       # Shortcut for ActiveSupport::Inflector, useful for name construction
-      Infl = ActiveSupport::Inflector
    end
 
     class Model < FileEntity
@@ -56,7 +50,7 @@ module RailsLauncher
 
       def file_content
         <<RUBY
-class #{Infl.camelize @model.name}
+class #{@model.name.to_s.camelize}
   attr_accessor #{properties.map(&:inspect).join(', ')}
 #{ relations }end
 RUBY
@@ -97,11 +91,11 @@ RUBY
 
       private
       def table_name
-        Infl.tableize(@model.name)
+        @model.name.to_s.tableize
       end
 
       def class_table_name
-        Infl.pluralize(Infl.classify(@model.name))
+        @model.name.to_s.classify.pluralize
       end
 
       def columns
