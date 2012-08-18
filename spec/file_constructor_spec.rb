@@ -24,7 +24,7 @@ describe RailsLauncher::FileConstructor do
     subject(:constructor) { described_class.new(simple_world) }
 
     it 'should create User model file' do
-      content_of_file('app/models/user.rb').should eq <<RUBY
+      expect(content_of_file('app/models/user.rb')).to eq <<RUBY
 class User
   attr_accessor :user_name
 end
@@ -32,7 +32,7 @@ RUBY
     end
 
     it 'should create a migration file for users table' do
-      content_of_file('db/migrate/001_create_users.rb').should eq <<RUBY
+      expect(content_of_file('db/migrate/001_create_users.rb')).to eq <<RUBY
 class CreateUsers < ActiveRecord::Migration
   def change
     create_table :users do |t|
@@ -49,7 +49,7 @@ RUBY
     subject(:constructor) { described_class.new(two_models) }
 
     it 'should create Post model file' do
-      content_of_file('app/models/post.rb').should eq <<RUBY
+      expect(content_of_file('app/models/post.rb')).to eq <<RUBY
 class Post
   attr_accessor :title
 end
@@ -57,12 +57,12 @@ RUBY
     end
 
     it 'should create Post migration file' do
-      content_of_file('db/migrate/\d\d\d_create_posts.rb').should match /t.string :title/
+      expect(content_of_file('db/migrate/\d\d\d_create_posts.rb')).to match /t.string :title/
     end
 
     it 'should have migration files for posts and users tables' do
-      content_of_file('db/migrate/\d\d\d_create_users.rb').should_not be_empty
-      content_of_file('db/migrate/\d\d\d_create_posts.rb').should_not be_empty
+      expect(content_of_file('db/migrate/\d\d\d_create_users.rb')).not_to be_empty
+      expect(content_of_file('db/migrate/\d\d\d_create_posts.rb')).not_to be_empty
     end
   end
 

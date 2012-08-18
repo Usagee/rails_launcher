@@ -16,7 +16,7 @@ describe RailsLauncher::Generator do
     described_class.new(simple_world_path).generate_files(tempdir)
     files = Dir.glob("**/*")
 
-    files.should include 'app/models/user.rb'
-    files.should include 'db/migrate/001_create_users.rb'
+    expect(files).to include 'app/models/user.rb'
+    expect(files).to include 'db/migrate/001_create_users.rb'
   end
 end
