@@ -18,5 +18,6 @@ describe RailsLauncher::Generator do
 
     expect(files).to include 'app/models/user.rb'
     expect(files).to include 'db/migrate/001_create_users.rb'
+    expect(files).to include 'app/controllers/users_controller.rb'
   end
 end

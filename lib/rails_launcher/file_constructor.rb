@@ -6,7 +6,7 @@ module RailsLauncher
     end
 
     def file_entities
-      models + migrations
+      models + migrations + controllers
     end
 
     private
@@ -17,6 +17,10 @@ module RailsLauncher
 
     def migrations
       @world.models.map { |m| Migration.new(m, @migration_id += 1) }
+    end
+
+    def controllers
+      @world.models.map { |m| Controller.new(m.name) }
     end
 
     class FileEntity
@@ -114,6 +118,69 @@ RUBY
       def belonging_relations
         @belonging_relations ||=
           @model.relations.select { |rel| rel[0] == 'belongs_to' }
+      end
+    end
+
+    class Controller < FileEntity
+      def initialize(name)
+        @name = name
+      end
+
+      def path
+        "app/controllers/#{controller_name}.rb"
+      end
+
+      def file_content
+        %Q{class #{controller_name.classify} < ApplicationController
+  def index
+    @<%= plural_table_name %> = <%= orm_class.all(class_name) %>
+  end
+
+  def show
+    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+  end
+
+  def new
+    @<%= singular_table_name %> = <%= orm_class.build(class_name) %>
+  end
+
+  def edit
+    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+  end
+
+  def create
+    @<%= singular_table_name %> = <%= orm_class.build(class_name, "params[:\#{singular_table_name}]") %>
+
+    if @<%= orm_instance.save %>
+      redirect_to @<%= singular_table_name %>, notice: <%= "'\#{human_name} was successfully created.'" %>
+    else
+      render action: "new"
+    end
+  end
+
+  def update
+    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+
+    if @<%= orm_instance.update_attributes("params[:\#{singular_table_name}]") %>
+      redirect_to @<%= singular_table_name %>, notice: <%= "'\#{human_name} was successfully updated.'" %>
+    else
+      render action: "edit"
+    end
+  end
+
+  def destroy
+    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+    @<%= orm_instance.destroy %>
+
+    redirect_to <%= index_helper %>_url
+  end
+end
+}
+      end
+
+      protected
+      def controller_name
+        @name.to_s.tableize + "_controller"
       end
     end
   end

@@ -37,6 +37,18 @@ class CreateUsers < ActiveRecord::Migration
 end
 RUBY
     end
+
+    context 'UsersController' do
+      subject { content_of_file('app/controllers/users_controller.rb') }
+
+      it { should match_line "class UsersController < ApplicationController" }
+      it { should match_line "def index" }
+      it { should match_line "def new" }
+      it { should match_line "def edit" }
+      it { should match_line "def create" }
+      it { should match_line "def update" }
+      it { should match_line "def destroy" }
+    end
   end
 
   describe 'files for simple two models without relationship' do
