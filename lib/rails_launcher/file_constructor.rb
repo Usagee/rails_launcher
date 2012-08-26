@@ -123,7 +123,7 @@ RUBY
 
     class Controller < FileEntity
       def initialize(name)
-        @name = name
+        @name = name.to_s
       end
 
       def path
@@ -133,46 +133,47 @@ RUBY
       def file_content
         %Q{class #{controller_name.classify} < ApplicationController
   def index
-    @<%= plural_table_name %> = <%= orm_class.all(class_name) %>
+    @#{plural} = #{model}.all
   end
 
   def show
-    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+    #{find}
   end
 
   def new
-    @<%= singular_table_name %> = <%= orm_class.build(class_name) %>
+    @#{singular} = #{model}.new
   end
 
   def edit
-    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+    #{find}
   end
 
   def create
-    @<%= singular_table_name %> = <%= orm_class.build(class_name, "params[:\#{singular_table_name}]") %>
+    @#{singular} = #{model}.create(params[:#{singular}])
 
-    if @<%= orm_instance.save %>
-      redirect_to @<%= singular_table_name %>, notice: <%= "'\#{human_name} was successfully created.'" %>
+    if @#{singular}.save
+      redirect_to @#{singular}, notice: #{"'\#{human_name} was successfully created.'"}
     else
       render action: "new"
     end
   end
 
   def update
-    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+    #{find}
+    @#{singular} = #{model}.find(params[:id])
 
-    if @<%= orm_instance.update_attributes("params[:\#{singular_table_name}]") %>
-      redirect_to @<%= singular_table_name %>, notice: <%= "'\#{human_name} was successfully updated.'" %>
+    if @#{singular}.update_attributes(params[:#{singular}])
+      redirect_to @#{singular}, notice: #{"'\#{human_name} was successfully updated.'"}
     else
       render action: "edit"
     end
   end
 
   def destroy
-    @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
-    @<%= orm_instance.destroy %>
+    #{find}
+    @#{singular}.destroy
 
-    redirect_to <%= index_helper %>_url
+    redirect_to #{index_helper}_url
   end
 end
 }
@@ -180,7 +181,31 @@ end
 
       protected
       def controller_name
-        @name.to_s.tableize + "_controller"
+        @name.tableize + "_controller"
+      end
+
+      def index_helper
+        @name.pluralize
+      end
+
+      def plural
+        @name.pluralize
+      end
+
+      def singular
+        @name
+      end
+
+      def model
+        @name.classify
+      end
+
+      def human_name
+        @name.humanize
+      end
+
+      def find
+        "@#{singular} = #{model}.find(params[:id])"
       end
     end
   end
