@@ -15,31 +15,50 @@ module RailsLauncher
         @models = []
       end
 
-      def model(name, &block)
-        m = Model.new(name)
-        m.instance_eval(&block)
+      # Define new model
+      # If block given, that is evaluated in the context of a new model.
+      # If a model exists with the same name, that is returned.
+      #
+      def model(a_name, &block)
+        name = a_name.to_s.singularize.to_sym
+        if m = find_model(name)
+          return m
+        end
+        m = Model.new(name, self)
+        m.instance_eval(&block) if block_given?
         @models << m
 
         eigen_class = class << self; self; end
         eigen_class.instance_eval do
-          plural_name = name.to_s.pluralize.to_sym
           define_method(name) { m }
-          define_method(plural_name) { m }
+          define_method(m.plural_symbol) { m }
         end
+        m
+      end
+
+      # Find existing model
+      #
+      def find_model(name)
+        models.find { |m| m.name == name }
       end
     end
 
     class Model
       attr_reader :name, :fields, :relations
 
-      def initialize(name)
+      def initialize(name, world)
         @name = name
+        @world = world
         @fields = []
         @relations = []
       end
 
       def string(name, opts = {})
         @fields << ['string', name]
+      end
+
+      def plural_symbol
+        name.to_s.pluralize.to_sym
       end
 
       # Add has_one relationship to the given model
@@ -51,9 +70,19 @@ module RailsLauncher
 
       # Add has_many relationship to the given model
       #
-      def has_many(model)
-        @relations << ['has_many', model.name.to_s.pluralize.to_sym]
-        model.belongs_to(self)
+      def has_many(model, opts = {})
+        if opts[:through]
+          medium = if opts[:through].respond_to?(:belongs_to)
+                     opts[:through]
+                   else
+                     @world.model(opts[:through])
+                   end
+          self.has_many_through(model, medium)
+          model.has_many_through(self, medium)
+        else
+          @relations << ['has_many', model.plural_symbol]
+          model.belongs_to(self)
+        end
       end
 
       # Add belongs_to relationship
@@ -62,6 +91,15 @@ module RailsLauncher
       #
       def belongs_to(model)
         @relations << ['belongs_to', model.name]
+      end
+
+      # Add has_many :through relationsip
+      # Do not use this function from DSL
+      # called by other models
+      #
+      def has_many_through(other, medium)
+        has_many(medium)
+        @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
       end
     end
   end

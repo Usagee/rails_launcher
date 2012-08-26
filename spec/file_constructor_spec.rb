@@ -1,8 +1,18 @@
 require 'spec_helper'
 
+# Expect that actual contains a line matching expected
+RSpec::Matchers.define :match_line do |expected|
+  match do |actual|
+    actual.match /^\s*#{expected}$/
+  end
+end
+
 describe RailsLauncher::FileConstructor do
   let(:world) { sample_world(world_name) }
-  subject(:constructor) { described_class.new(world) }
+
+  # to avoid stack level too deep
+  let(:constructor) { described_class.new(world) }
+  subject { constructor }
 
   describe 'files for the simple world' do
     let(:world_name) { 'simple' }
@@ -54,17 +64,17 @@ RUBY
     let(:world_name) { 'has_one' }
 
     specify 'User model file should contain has_one' do
-      expect(content_of_file('app/models/user.rb')).to match(/^\s*has_one :blog$/)
+      expect(content_of_file('app/models/user.rb')).to match_line "has_one :blog"
     end
 
     specify 'Blog model should contain belongs to user' do
-      expect(content_of_file('app/models/blog.rb')).to match(/^\s*belongs_to :user$/)
+      expect(content_of_file('app/models/blog.rb')).to match_line "belongs_to :user"
     end
 
     specify 'blogs migration should contain user reference and index for it' do
       migration = content_of_file('db/migrate/\d\d\d_create_blogs.rb')
-      expect(migration).to match(/^\s*t.references :user$/)
-      expect(migration).to match(/^\s*add_index :blogs, :user_id$/)
+      expect(migration).to match_line "t.references :user"
+      expect(migration).to match_line "add_index :blogs, :user_id"
     end
   end
 
@@ -72,12 +82,42 @@ RUBY
     let(:world_name) { 'has_many' }
 
     specify 'User model file should contain has_many' do
-      expect(content_of_file('app/models/user.rb')).to match(/^\s*has_many :posts$/)
+      expect(content_of_file('app/models/user.rb')).to match_line "has_many :posts"
+    end
+  end
+
+  describe 'files for has_many_through' do
+    let(:world_name) { 'has_many_through' }
+
+    context 'User model file' do
+      subject { content_of_file('app/models/user.rb') }
+      it { should match_line "has_many :comments" }
+      it { should match_line "has_many :posts, through: :comments" }
+    end
+
+    context 'Post model file' do
+      subject { content_of_file('app/models/post.rb') }
+      it { should match_line "has_many :comments" }
+      it { should match_line "has_many :users, through: :comments" }
+    end
+
+    context 'Comment model file' do
+      subject { content_of_file('app/models/comment.rb') }
+      it { should match_line "belongs_to :user" }
+      it { should match_line "belongs_to :post" }
+    end
+
+    context 'Comment migration file' do
+      subject { content_of_file('db/migrate/\d\d\d_create_comments.rb') }
+      it { should match_line "t.references :user" }
+      it { should match_line "add_index :comments, :user_id" }
+      it { should match_line "t.references :post" }
+      it { should match_line "add_index :comments, :post_id" }
     end
   end
 
   def content_of_file(path_regexp)
-    matches = subject.file_entities.select { |f| f.path.match path_regexp }
+    matches = constructor.file_entities.select { |f| f.path.match path_regexp }
     case matches.size
     when 0
       fail("#{path_regexp} is expected to match a file constructed, but nothing matched")
