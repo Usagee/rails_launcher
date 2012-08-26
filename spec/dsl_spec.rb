@@ -45,12 +45,7 @@ describe RailsLauncher::DSL do
   end
 
   describe 'two models and a medium model for has_many_through' do
-    subject(:world) { RailsLauncher::DSL.new_world %q{
-model(:user) { string 'user_name' }
-model(:post) { string 'title' }
-model(:comment) { string 'content' }
-user.has_many posts, through: comments
-} }
+    subject(:world) { sample_world('has_many_through') }
 
     context 'user' do
       specify { expect(model :user).to have_many :comments }
