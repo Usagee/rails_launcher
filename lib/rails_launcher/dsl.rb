@@ -44,13 +44,14 @@ module RailsLauncher
     end
 
     class Model
-      attr_reader :name, :fields, :relations
+      attr_reader :name, :fields, :relations, :controller
 
       def initialize(name, world)
         @name = name
         @world = world
         @fields = []
         @relations = []
+        @controller = true
       end
 
       def string(name, opts = {})
@@ -83,6 +84,11 @@ module RailsLauncher
           @relations << ['has_many', model.plural_symbol]
           model.belongs_to(self)
         end
+      end
+
+      # Specify that this model has no controller
+      def no_controller
+        @controller = false
       end
 
       # Add belongs_to relationship
