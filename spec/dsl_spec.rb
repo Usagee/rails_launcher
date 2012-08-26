@@ -45,12 +45,7 @@ describe RailsLauncher::DSL do
   end
 
   describe 'two models and a medium model for has_many_through' do
-    subject(:world) { RailsLauncher::DSL.new_world %q{
-model(:user) { string 'user_name' }
-model(:post) { string 'title' }
-model(:comment) { string 'content' }
-user.has_many posts, through: comments
-} }
+    subject(:world) { sample_world('has_many_through') }
 
     context 'user' do
       specify { expect(model :user).to have_many :comments }
@@ -77,6 +72,7 @@ user.has_many posts, through: :comments
 
     context 'comment' do
       specify { expect(model :comment).not_to be_nil }
+      specify { expect(model :comment).not_to have_controller  }
     end
   end
 
@@ -86,6 +82,22 @@ model(:user) { string 'user_name' }
 model(:post) { string 'title' }
 model(:comment) { string 'content' }
 user.has_many posts, through: :comments
+}}
+
+    specify 'world should have one comment model with content field' do
+      expect(world.models.select { |m| m.name == :comment }).to have(1).item
+      expect(model :comment).to have_field ['string', 'content']
+    end
+
+    specify { expect(model :comment).to have_controller  }
+  end
+
+  describe 'overriding an automatically generated model' do
+    subject(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) { string 'user_name' }
+model(:post) { string 'title' }
+user.has_many posts, through: :comments
+model(:comment) { string 'content' }
 }}
 
     specify 'world should have one comment model with content field' do

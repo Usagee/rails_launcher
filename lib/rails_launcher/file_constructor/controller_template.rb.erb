@@ -1,0 +1,45 @@
+class <%= controller_name.classify %> < ApplicationController
+  def index
+    @<%= plural %> = <%= model %>.all
+  end
+
+  def show
+    <%= find %>
+  end
+
+  def new
+    @<%= singular %> = <%= model %>.new
+  end
+
+  def edit
+    <%= find %>
+  end
+
+  def create
+    @<%= singular %> = <%= model %>.create(params[:<%= singular %>])
+
+    if @<%= singular %>.save
+      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully created.'
+    else
+      render action: "new"
+    end
+  end
+
+  def update
+    <%= find %>
+    @<%= singular %> = <%= model %>.find(params[:id])
+
+    if @<%= singular %>.update_attributes(params[:<%= singular %>])
+      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully updated.'
+    else
+      render action: "edit"
+    end
+  end
+
+  def destroy
+    <%= find %>
+    @<%= singular %>.destroy
+
+    redirect_to <%= index_helper %>_url
+  end
+end

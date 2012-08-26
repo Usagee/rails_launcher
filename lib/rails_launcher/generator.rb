@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module RailsLauncher
   class Generator
     def initialize(definition_path)

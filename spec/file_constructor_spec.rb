@@ -19,7 +19,7 @@ describe RailsLauncher::FileConstructor do
 
     it 'should create User model file' do
       expect(content_of_file('app/models/user.rb')).to eq <<RUBY
-class User
+class User < ActiveRecord::Base
   attr_accessible :user_name
 end
 RUBY
@@ -37,6 +37,22 @@ class CreateUsers < ActiveRecord::Migration
 end
 RUBY
     end
+
+    context 'UsersController' do
+      subject { content_of_file('app/controllers/users_controller.rb') }
+
+      it { should match_line "class UsersController < ApplicationController" }
+      it { should match_line "def index" }
+      it { should match_line "@users = User.all" }
+      it { should match_line "def show" }
+      it { should match_line "def new" }
+      it { should match_line "def edit" }
+      # this does not match with string, because of special chars
+      it { should match_line /@user = User.find\(params\[:id\]\)/ }
+      it { should match_line "def create" }
+      it { should match_line "def update" }
+      it { should match_line "def destroy" }
+    end
   end
 
   describe 'files for simple two models without relationship' do
@@ -44,7 +60,7 @@ RUBY
 
     it 'should create Post model file' do
       expect(content_of_file('app/models/post.rb')).to eq <<RUBY
-class Post
+class Post < ActiveRecord::Base
   attr_accessible :title
 end
 RUBY

@@ -22,8 +22,32 @@ module RailsLauncher
       def model(a_name, &block)
         name = a_name.to_s.singularize.to_sym
         if m = find_model(name)
+          m.instance_eval &block if block_given?
           return m
         end
+        new_model(name, &block)
+      end
+
+      # Resolve symbol to an actual model instance
+      # If a corresponding model does not exists, it is created.
+      # Created model does not have a controller
+      #
+      def resolve_model(a_name)
+        name = a_name.to_s.singularize.to_sym
+        if m = find_model(name)
+          return m
+        end
+        model(name) { no_controller }
+      end
+
+      # Find existing model
+      #
+      def find_model(name)
+        models.find { |m| m.name == name }
+      end
+
+      private
+      def new_model(name, &block)
         m = Model.new(name, self)
         m.instance_eval(&block) if block_given?
         @models << m
@@ -35,22 +59,19 @@ module RailsLauncher
         end
         m
       end
-
-      # Find existing model
-      #
-      def find_model(name)
-        models.find { |m| m.name == name }
-      end
     end
 
     class Model
-      attr_reader :name, :fields, :relations
+      attr_reader :name, :fields, :relations, :controller
+
+      alias has_controller? controller
 
       def initialize(name, world)
         @name = name
         @world = world
         @fields = []
         @relations = []
+        @controller = true
       end
 
       def string(name, opts = {})
@@ -75,7 +96,7 @@ module RailsLauncher
           medium = if opts[:through].respond_to?(:belongs_to)
                      opts[:through]
                    else
-                     @world.model(opts[:through])
+                     m = @world.resolve_model(opts[:through])
                    end
           self.has_many_through(model, medium)
           model.has_many_through(self, medium)
@@ -83,6 +104,11 @@ module RailsLauncher
           @relations << ['has_many', model.plural_symbol]
           model.belongs_to(self)
         end
+      end
+
+      # Specify that this model has no controller
+      def no_controller
+        @controller = false
       end
 
       # Add belongs_to relationship
