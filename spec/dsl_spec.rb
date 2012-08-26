@@ -92,6 +92,20 @@ user.has_many posts, through: :comments
     specify { expect(model :comment).to have_controller  }
   end
 
+  describe 'overriding an automatically generated model' do
+    subject(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) { string 'user_name' }
+model(:post) { string 'title' }
+user.has_many posts, through: :comments
+model(:comment) { string 'content' }
+}}
+
+    specify 'world should have one comment model with content field' do
+      expect(world.models.select { |m| m.name == :comment }).to have(1).item
+      expect(model :comment).to have_field ['string', 'content']
+    end
+  end
+
   def model(name)
     world.find_model(name)
   end

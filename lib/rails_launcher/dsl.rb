@@ -22,6 +22,7 @@ module RailsLauncher
       def model(a_name, &block)
         name = a_name.to_s.singularize.to_sym
         if m = find_model(name)
+          m.instance_eval &block if block_given?
           return m
         end
         new_model(name, &block)
