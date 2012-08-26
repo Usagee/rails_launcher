@@ -36,6 +36,31 @@ describe RailsLauncher::DSL do
     end
   end
 
+  describe 'two models and a medium model for has_many_through' do
+    subject(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) { string 'user_name' }
+model(:post) { string 'title' }
+model(:comment) { string 'content' }
+user.has_many posts, through: comments
+} }
+
+    specify 'user model should have many comments' do
+      expect(model(:user).relations).to include(['has_many', :comments])
+    end
+
+    specify 'user model should have many posts through comments' do
+      expect(model(:user).relations).to include(['has_many', :posts, through: :comments])
+    end
+
+    specify 'post model should have many comments' do
+      expect(model(:post).relations).to include(['has_many', :comments])
+    end
+
+    specify 'post model should have many users through comments' do
+      expect(model(:post).relations).to include(['has_many', :users, through: :comments])
+    end
+  end
+
   def model(name)
     world.models.find { |m| m.name == name }
   end

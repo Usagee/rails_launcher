@@ -22,9 +22,8 @@ module RailsLauncher
 
         eigen_class = class << self; self; end
         eigen_class.instance_eval do
-          plural_name = name.to_s.pluralize.to_sym
           define_method(name) { m }
-          define_method(plural_name) { m }
+          define_method(m.plural_symbol) { m }
         end
       end
     end
@@ -42,6 +41,10 @@ module RailsLauncher
         @fields << ['string', name]
       end
 
+      def plural_symbol
+        name.to_s.pluralize.to_sym
+      end
+
       # Add has_one relationship to the given model
       #
       def has_one(model)
@@ -51,9 +54,14 @@ module RailsLauncher
 
       # Add has_many relationship to the given model
       #
-      def has_many(model)
-        @relations << ['has_many', model.name.to_s.pluralize.to_sym]
-        model.belongs_to(self)
+      def has_many(model, opts = {})
+        if opts[:through]
+          self.has_many_through(model, opts[:through])
+          model.has_many_through(self, opts[:through])
+        else
+          @relations << ['has_many', model.plural_symbol]
+          model.belongs_to(self)
+        end
       end
 
       # Add belongs_to relationship
@@ -62,6 +70,16 @@ module RailsLauncher
       #
       def belongs_to(model)
         @relations << ['belongs_to', model.name]
+      end
+
+      # Add has_many :through relationsip
+      # Do not use this function from DSL
+      # called by other models
+      #
+      def has_many_through(other, medium)
+          @relations << ['has_many', medium.plural_symbol]
+          @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
+          medium.belongs_to(self)
       end
     end
   end
