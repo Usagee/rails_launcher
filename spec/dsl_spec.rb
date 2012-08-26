@@ -72,6 +72,7 @@ user.has_many posts, through: :comments
 
     context 'comment' do
       specify { expect(model :comment).not_to be_nil }
+      specify { expect(model :comment).not_to have_controller  }
     end
   end
 
@@ -87,6 +88,8 @@ user.has_many posts, through: :comments
       expect(world.models.select { |m| m.name == :comment }).to have(1).item
       expect(model :comment).to have_field ['string', 'content']
     end
+
+    specify { expect(model :comment).to have_controller  }
   end
 
   def model(name)
