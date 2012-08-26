@@ -63,9 +63,9 @@ RUBY
       end
 
       def relations
+        opts = -> arg { arg ? arg.map { |k, v| ", #{k}: #{v.inspect}" }.join : '' }
         @model.relations.map { |r|
-          options = r[2] ? r[2].map { |k, v| ", #{k}: #{v.inspect}" }.join : ''
-          '  ' + r[0] + ' ' + r[1].inspect + options + "\n"
+          '  ' + r[0] + ' ' + r[1].inspect + opts.call(r[2]) + "\n"
         }.join
       end
     end
