@@ -1,5 +1,23 @@
 require 'spec_helper'
 
+{ belong_to: 'belongs_to', have_one: 'has_one', have_many: 'has_many' }.each do |matcher, relation|
+  RSpec::Matchers.define matcher do |expected, opts = {}|
+    match do |actual|
+      if opts.empty?
+        actual.relations.include? [relation, expected]
+      else
+        actual.relations.include? [relation, expected, opts]
+      end
+    end
+  end
+end
+
+RSpec::Matchers.define :have_field do |type, field|
+  match do |actual|
+    actual.fields.include? [type, field]
+  end
+end
+
 describe RailsLauncher::DSL do
   describe 'world with single model' do
     subject(:world) { sample_world('simple') }
@@ -7,7 +25,7 @@ describe RailsLauncher::DSL do
     it { should have(1).models }
 
     it 'user model should have user_name field' do
-      expect(subject.models.first.fields.first).to eq(['string', 'user_name'])
+      expect(subject.models.first).to have_field 'string', 'user_name'
     end
   end
 
@@ -15,25 +33,15 @@ describe RailsLauncher::DSL do
     subject(:world) { sample_world('has_one') }
 
     it { should have(2).models }
-    specify 'user model should have one blog' do
-      expect(model(:user).relations.first).to eq(['has_one', :blog])
-    end
-
-    specify 'blog model should belong to an user' do
-      expect(model(:blog).relations.first).to eq(['belongs_to', :user])
-    end
+    context('user') { specify { expect(model :user).to have_one :blog } }
+    context('blog') { specify { expect(model :blog).to belong_to :user } }
   end
 
   describe 'two models with has_many relationship' do
     subject(:world) { sample_world('has_many') }
 
-    specify 'user model should have many posts' do
-      expect(model(:user).relations.first).to eq(['has_many', :posts])
-    end
-
-    specify 'post model should belongs to an user' do
-      expect(model(:post).relations.first).to eq(['belongs_to', :user])
-    end
+    context('user') { specify { expect(model :user).to have_many :posts } }
+    context('post') { specify { expect(model :post).to belong_to :user } }
   end
 
   describe 'two models and a medium model for has_many_through' do
@@ -44,20 +52,14 @@ model(:comment) { string 'content' }
 user.has_many posts, through: comments
 } }
 
-    specify 'user model should have many comments' do
-      expect(model(:user).relations).to include(['has_many', :comments])
+    context 'user' do
+      specify { expect(model :user).to have_many :comments }
+      specify { expect(model :user).to have_many :posts, through: :comments }
     end
 
-    specify 'user model should have many posts through comments' do
-      expect(model(:user).relations).to include(['has_many', :posts, through: :comments])
-    end
-
-    specify 'post model should have many comments' do
-      expect(model(:post).relations).to include(['has_many', :comments])
-    end
-
-    specify 'post model should have many users through comments' do
-      expect(model(:post).relations).to include(['has_many', :users, through: :comments])
+    context 'post' do
+      specify { expect(model :post).to have_many :comments }
+      specify { expect(model :post).to have_many :users, through: :comments }
     end
   end
 
@@ -68,16 +70,13 @@ model(:post) { string 'title' }
 user.has_many posts, through: :comments
 } }
 
-    specify 'user model should have many comments' do
-      expect(model(:user).relations).to include(['has_many', :comments])
+    context 'user' do
+      specify { expect(model :user).to have_many :comments }
+      specify { expect(model :user).to have_many :posts, through: :comments }
     end
 
-    specify 'user model should have many posts through comments' do
-      expect(model(:user).relations).to include(['has_many', :posts, through: :comments])
-    end
-
-    specify 'world should have comment model' do
-      expect(model(:comment)).not_to be_nil
+    context 'comment' do
+      specify { expect(model :comment).not_to be_nil }
     end
   end
 
@@ -91,7 +90,7 @@ user.has_many posts, through: :comments
 
     specify 'world should have one comment model with content field' do
       expect(world.models.select { |m| m.name == :comment }).to have(1).item
-      expect(model(:comment).fields).to include ['string', 'content']
+      expect(model :comment).to have_field ['string', 'content']
     end
   end
 
