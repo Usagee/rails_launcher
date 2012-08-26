@@ -61,6 +61,26 @@ user.has_many posts, through: comments
     end
   end
 
+  describe 'has_many without medium declaration' do
+    subject(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) { string 'user_name' }
+model(:post) { string 'title' }
+user.has_many posts, through: :comments
+} }
+
+    specify 'user model should have many comments' do
+      expect(model(:user).relations).to include(['has_many', :comments])
+    end
+
+    specify 'user model should have many posts through comments' do
+      expect(model(:user).relations).to include(['has_many', :posts, through: :comments])
+    end
+
+    specify 'world should have comment model' do
+      expect(model(:comment)).not_to be_nil
+    end
+  end
+
   def model(name)
     world.models.find { |m| m.name == name }
   end

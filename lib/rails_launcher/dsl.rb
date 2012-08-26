@@ -16,8 +16,8 @@ module RailsLauncher
       end
 
       def model(name, &block)
-        m = Model.new(name)
-        m.instance_eval(&block)
+        m = Model.new(name.to_s.singularize, self)
+        m.instance_eval(&block) if block_given?
         @models << m
 
         eigen_class = class << self; self; end
@@ -25,14 +25,16 @@ module RailsLauncher
           define_method(name) { m }
           define_method(m.plural_symbol) { m }
         end
+        m
       end
     end
 
     class Model
       attr_reader :name, :fields, :relations
 
-      def initialize(name)
-        @name = name
+      def initialize(name, world)
+        @name = name.to_sym
+        @world = world
         @fields = []
         @relations = []
       end
@@ -56,8 +58,13 @@ module RailsLauncher
       #
       def has_many(model, opts = {})
         if opts[:through]
-          self.has_many_through(model, opts[:through])
-          model.has_many_through(self, opts[:through])
+          medium = if opts[:through].respond_to?(:belongs_to)
+                     opts[:through]
+                   else
+                     @world.model(opts[:through])
+                   end
+          self.has_many_through(model, medium)
+          model.has_many_through(self, medium)
         else
           @relations << ['has_many', model.plural_symbol]
           model.belongs_to(self)
@@ -77,9 +84,8 @@ module RailsLauncher
       # called by other models
       #
       def has_many_through(other, medium)
-          @relations << ['has_many', medium.plural_symbol]
-          @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
-          medium.belongs_to(self)
+        has_many(medium)
+        @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
       end
     end
   end
