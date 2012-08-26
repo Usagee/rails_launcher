@@ -19,7 +19,7 @@ describe RailsLauncher::FileConstructor do
 
     it 'should create User model file' do
       expect(content_of_file('app/models/user.rb')).to eq <<RUBY
-class User
+class User < ActiveRecord::Base
   attr_accessible :user_name
 end
 RUBY
@@ -60,7 +60,7 @@ RUBY
 
     it 'should create Post model file' do
       expect(content_of_file('app/models/post.rb')).to eq <<RUBY
-class Post
+class Post < ActiveRecord::Base
   attr_accessible :title
 end
 RUBY

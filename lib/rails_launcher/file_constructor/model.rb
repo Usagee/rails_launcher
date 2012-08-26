@@ -10,7 +10,7 @@ class RailsLauncher::FileConstructor
 
     def file_content
       <<RUBY
-class #{@model.name.to_s.camelize}
+class #{@model.name.to_s.camelize} < ActiveRecord::Base
   attr_accessible #{properties.map(&:inspect).join(', ')}
 #{ relations }end
 RUBY

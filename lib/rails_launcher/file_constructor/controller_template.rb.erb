@@ -19,7 +19,7 @@ class <%= controller_name.classify %> < ApplicationController
     @<%= singular %> = <%= model %>.create(params[:<%= singular %>])
 
     if @<%= singular %>.save
-      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully created.'}
+      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully created.'
     else
       render action: "new"
     end
@@ -30,7 +30,7 @@ class <%= controller_name.classify %> < ApplicationController
     @<%= singular %> = <%= model %>.find(params[:id])
 
     if @<%= singular %>.update_attributes(params[:<%= singular %>])
-      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully updated.'}
+      redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully updated.'
     else
       render action: "edit"
     end
