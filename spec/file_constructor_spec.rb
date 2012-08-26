@@ -2,7 +2,10 @@ require 'spec_helper'
 
 describe RailsLauncher::FileConstructor do
   let(:world) { sample_world(world_name) }
-  subject(:constructor) { described_class.new(world) }
+
+  # to avoid stack level too deep
+  let(:constructor) { described_class.new(world) }
+  subject { constructor }
 
   describe 'files for the simple world' do
     let(:world_name) { 'simple' }
@@ -76,8 +79,38 @@ RUBY
     end
   end
 
+  describe 'files for has_many_through' do
+    let(:world_name) { 'has_many_through' }
+
+    context 'User model file' do
+      subject { content_of_file('app/models/user.rb') }
+      it { should match(/^\s*has_many :comments$/) }
+      it { should match(/^\s*has_many :posts, through: :comments$/) }
+    end
+
+    context 'Post model file' do
+      subject { content_of_file('app/models/post.rb') }
+      it { should match(/^\s*has_many :comments$/) }
+      it { should match(/^\s*has_many :users, through: :comments$/) }
+    end
+
+    context 'Comment model file' do
+      subject { content_of_file('app/models/comment.rb') }
+      it { should match(/^\s*belongs_to :user$/) }
+      it { should match(/^\s*belongs_to :post$/) }
+    end
+
+    context 'Comment migration file' do
+      subject { content_of_file('db/migrate/\d\d\d_create_comments.rb') }
+      it { should match(/^\s*t.references :user$/) }
+      it { should match(/^\s*add_index :comments, :user_id$/) }
+      it { should match(/^\s*t.references :post$/) }
+      it { should match(/^\s*add_index :comments, :post_id$/) }
+    end
+  end
+
   def content_of_file(path_regexp)
-    matches = subject.file_entities.select { |f| f.path.match path_regexp }
+    matches = constructor.file_entities.select { |f| f.path.match path_regexp }
     case matches.size
     when 0
       fail("#{path_regexp} is expected to match a file constructed, but nothing matched")

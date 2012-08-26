@@ -63,7 +63,10 @@ RUBY
       end
 
       def relations
-        @model.relations.map { |r| '  ' + r[0] + ' ' + r[1].inspect + "\n" }.join
+        @model.relations.map { |r|
+          options = r[2] ? r[2].map { |k, v| ", #{k}: #{v.inspect}" }.join : ''
+          '  ' + r[0] + ' ' + r[1].inspect + options + "\n"
+        }.join
       end
     end
 
