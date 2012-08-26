@@ -81,7 +81,21 @@ user.has_many posts, through: :comments
     end
   end
 
+  describe 'has_many_through with symbol when model is defined' do
+    subject(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) { string 'user_name' }
+model(:post) { string 'title' }
+model(:comment) { string 'content' }
+user.has_many posts, through: :comments
+}}
+
+    specify 'world should have one comment model with content field' do
+      expect(world.models.select { |m| m.name == :comment }).to have(1).item
+      expect(model(:comment).fields).to include ['string', 'content']
+    end
+  end
+
   def model(name)
-    world.models.find { |m| m.name == name }
+    world.find_model(name)
   end
 end

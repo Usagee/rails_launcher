@@ -15,8 +15,16 @@ module RailsLauncher
         @models = []
       end
 
-      def model(name, &block)
-        m = Model.new(name.to_s.singularize, self)
+      # Define new model
+      # If block given, that is evaluated in the context of a new model.
+      # If a model exists with the same name, that is returned.
+      #
+      def model(a_name, &block)
+        name = a_name.to_s.singularize.to_sym
+        if m = find_model(name)
+          return m
+        end
+        m = Model.new(name, self)
         m.instance_eval(&block) if block_given?
         @models << m
 
@@ -27,13 +35,19 @@ module RailsLauncher
         end
         m
       end
+
+      # Find existing model
+      #
+      def find_model(name)
+        models.find { |m| m.name == name }
+      end
     end
 
     class Model
       attr_reader :name, :fields, :relations
 
       def initialize(name, world)
-        @name = name.to_sym
+        @name = name
         @world = world
         @fields = []
         @relations = []
