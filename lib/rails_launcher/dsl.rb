@@ -116,7 +116,7 @@ module RailsLauncher
 
       def controller(opts = nil)
           return @controller if opts == nil
-          @controller = opts
+          @controller = optimize_opts(opts)
       end
 
       # Add belongs_to relationship
@@ -134,6 +134,16 @@ module RailsLauncher
       def has_many_through(other, medium)
         has_many(medium)
         @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
+      end
+
+      private
+
+      def optimize_opts(opts)
+        if opts[:except]
+          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - opts[:except]
+          opts[:only] = opts[:only] ? opts[:only] & rest_methods : rest_methods
+        end
+        opts
       end
     end
   end
