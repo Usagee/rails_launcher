@@ -106,6 +106,22 @@ model(:comment) { string 'content' }
     end
   end
 
+  describe 'User allows only CR' do
+    let(:world) { RailsLauncher::DSL.new_world %q{
+model(:user) do
+  controller only: [:index, :new, :create, :show]
+end
+}}
+    context 'Users controller' do
+      subject(:controller) { model(:user).controller }
+      it { should include :index }
+      it { should include :new }
+      it { should include :create }
+      it { should include :show }
+      it { should_not include :update }
+    end
+  end
+
   def model(name)
     world.find_model(name)
   end
