@@ -113,7 +113,7 @@ model(:user) do
 end
 }}
     context 'Users controller' do
-      subject(:controller) { model(:user).controller }
+      subject(:controller) { model(:user).controller[:only] }
       it { should include :index }
       it { should include :new }
       it { should include :create }

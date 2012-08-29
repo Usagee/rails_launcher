@@ -25,7 +25,7 @@ module RailsLauncher
     end
 
     def controllers
-      @world.models.select { |m| m.controller }.map { |m| Controller.new(m.name) }
+      @world.models.select { |m| m.has_controller? }.map { |m| Controller.new(m.name, m.controller) }
     end
   end
 end

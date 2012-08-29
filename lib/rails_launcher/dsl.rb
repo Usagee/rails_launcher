@@ -116,7 +116,7 @@ module RailsLauncher
 
       def controller(opts = nil)
           return @controller if opts == nil
-          @controller = opts[:only]
+          @controller = opts
       end
 
       # Add belongs_to relationship
