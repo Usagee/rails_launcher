@@ -106,6 +106,38 @@ model(:comment) { string 'content' }
     end
   end
 
+  describe 'UsersController options' do
+    let(:world) { RailsLauncher::DSL.new_world %Q{
+model(:user) do
+  #{definition}
+end
+}}
+    subject(:controller) { model(:user).controller[:only] }
+
+    context 'when only C and R are allowed' do
+      let(:definition) { "controller only: [:index, :new, :create, :show]" }
+      it { should include :index }
+      it { should include :new }
+      it { should include :create }
+      it { should include :show }
+      it { should_not include :update }
+    end
+
+    context 'except destroy' do
+      let(:definition) { "controller except: [:destroy]" }
+      it { should include :index }
+      it { should_not include :destroy }
+    end
+
+    context 'only index, new and create, except index' do
+      let(:definition) { "controller except: [:index], only: [:index, :new, :create]" }
+      it { should include :new }
+      it { should include :create }
+      it { should_not include :index }
+      it { should_not include :update }
+    end
+  end
+
   def model(name)
     world.find_model(name)
   end

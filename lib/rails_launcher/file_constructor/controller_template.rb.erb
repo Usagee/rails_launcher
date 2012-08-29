@@ -1,20 +1,29 @@
 class <%= controller_name.classify %> < ApplicationController
+<% if index? %>
   def index
     @<%= plural %> = <%= model %>.all
   end
 
+<% end %>
+<% if show? %>
   def show
     <%= find %>
   end
 
+<% end %>
+<% if new? %>
   def new
     @<%= singular %> = <%= model %>.new
   end
 
+<% end %>
+<% if edit? %>
   def edit
     <%= find %>
   end
 
+<% end %>
+<% if create? %>
   def create
     @<%= singular %> = <%= model %>.create(params[:<%= singular %>])
 
@@ -25,6 +34,8 @@ class <%= controller_name.classify %> < ApplicationController
     end
   end
 
+<% end %>
+<% if update? %>
   def update
     <%= find %>
     @<%= singular %> = <%= model %>.find(params[:id])
@@ -36,10 +47,13 @@ class <%= controller_name.classify %> < ApplicationController
     end
   end
 
+<% end %>
+<% if destroy? %>
   def destroy
     <%= find %>
     @<%= singular %>.destroy
 
     redirect_to <%= index_helper %>_url
   end
+<% end %>
 end

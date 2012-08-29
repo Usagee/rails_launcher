@@ -1,7 +1,8 @@
 class RailsLauncher::FileConstructor
   class Controller < FileEntity
-    def initialize(name)
+    def initialize(name, opts)
       @name = name.to_s
+      @opts = opts
     end
 
     def path
@@ -45,6 +46,13 @@ class RailsLauncher::FileConstructor
 
     def template_path
       File.join(File.dirname(__FILE__), 'controller_template.rb.erb')
+    end
+
+    [ :index, :show, :new, :create, :edit, :update, :destroy ].each do |method|
+      define_method("#{method}?") do
+        return true unless @opts[:only]
+        @opts[:only].include? method
+      end
     end
   end
 end

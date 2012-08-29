@@ -62,16 +62,19 @@ module RailsLauncher
     end
 
     class Model
-      attr_reader :name, :fields, :relations, :controller
+      attr_reader :name, :fields, :relations
 
-      alias has_controller? controller
+
+      def has_controller?
+        !! controller
+      end
 
       def initialize(name, world)
         @name = name
         @world = world
         @fields = []
         @relations = []
-        @controller = true
+        @controller = {}
       end
 
       def string(name, opts = {})
@@ -108,7 +111,12 @@ module RailsLauncher
 
       # Specify that this model has no controller
       def no_controller
-        @controller = false
+        @controller = nil
+      end
+
+      def controller(opts = nil)
+          return @controller if opts == nil
+          @controller = optimize_opts(opts)
       end
 
       # Add belongs_to relationship
@@ -126,6 +134,16 @@ module RailsLauncher
       def has_many_through(other, medium)
         has_many(medium)
         @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
+      end
+
+      private
+
+      def optimize_opts(opts)
+        if opts[:except]
+          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - opts[:except]
+          opts[:only] = opts[:only] ? opts[:only] & rest_methods : rest_methods
+        end
+        opts
       end
     end
   end
