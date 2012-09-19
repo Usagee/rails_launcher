@@ -54,5 +54,21 @@ class RailsLauncher::FileConstructor
         @opts[:only].include? method
       end
     end
+
+    class NoModel < Controller
+      def initialize(definition)
+        @definition = definition
+        @opts = definition.options
+      end
+
+      private
+      def controller_name
+        "#{@definition.name}_controller"
+      end
+
+      def template_path
+        File.join(File.dirname(__FILE__), 'no_model_controller_template.rb.erb')
+      end
+    end
   end
 end

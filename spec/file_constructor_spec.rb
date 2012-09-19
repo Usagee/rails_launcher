@@ -132,6 +132,22 @@ RUBY
     end
   end
 
+  describe 'routing' do
+    let(:world_name) { 'index_routing' }
+
+    context 'welcome controller' do
+      subject(:controller) { content_of_file('app/controllers/welcome_controller.rb') }
+      it { should match "class WelcomeController" }
+      it { should match_line "def index" }
+    end
+
+    context 'routes.rb' do
+      subject { content_of_file('config/routes.rb') }
+
+      it { should match_line 'root {:to=>"welcome#index"}' }
+    end
+  end
+
   def content_of_file(path_regexp)
     matches = constructor.file_entities.select { |f| f.path.match path_regexp }
     case matches.size
