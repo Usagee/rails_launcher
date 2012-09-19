@@ -9,10 +9,11 @@ module RailsLauncher
     end
 
     class World
-      attr_reader :models, :route_definition
+      attr_reader :models, :route_definition, :controllers
 
       def initialize
         @models = []
+        @controllers = []
       end
 
       # Define new model
@@ -53,6 +54,11 @@ module RailsLauncher
         routes = Routes.new
         routes.instance_eval(&block) if block_given?
         @route_definition = routes
+      end
+
+      # Define a model-free controller
+      def controller(name, opts)
+        @controllers << Controller.new(name, opts)
       end
 
       private
@@ -182,6 +188,22 @@ module RailsLauncher
       # Add a rails +match+ routing
       def match(*options)
         @matches << Route.new(options)
+      end
+    end
+
+    class Controller
+      attr_reader :name, :options
+
+      def initialize(name, options = {})
+        @name, @options = name, normalize(options)
+      end
+
+      def normalize(options)
+        # +include+ is required in FileConstructor::Controller
+        unless options[:only].respond_to?(:include)
+          options[:only] = [options[:only]]
+        end
+        options
       end
     end
   end

@@ -171,6 +171,19 @@ routes { match 'photos/:id' => 'photos#show' }
     end
   end
 
+  describe 'a controller without a corresponding model' do
+    describe 'controller' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+controller :welcome, only: :index
+ }}
+
+      subject(:controller) { world.controllers.first }
+
+      its(:name) { should == :welcome }
+      its(:options) { should == { only: [:index] } }
+    end
+  end
+
   def model(name)
     world.find_model(name)
   end
