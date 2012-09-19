@@ -12,7 +12,7 @@ class RailsLauncher::FileConstructor
       <<RUBY
 class #{@model.name.to_s.camelize} < ActiveRecord::Base
   attr_accessible #{properties.map(&:inspect).join(', ')}
-#{ relations }end
+#{ relations }#{ validations }end
 RUBY
     end
 
@@ -27,6 +27,12 @@ RUBY
       @model.relations.map { |r|
         '  ' + r[0] + ' ' + r[1].inspect + opts.call(r[2]) + "\n"
       }.join
+    end
+
+    def validations
+      @model.validations.map do |validation|
+        '  validates ' + validation.code + "\n"
+      end.join
     end
   end
 end

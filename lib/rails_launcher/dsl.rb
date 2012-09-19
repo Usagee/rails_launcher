@@ -62,8 +62,7 @@ module RailsLauncher
     end
 
     class Model
-      attr_reader :name, :fields, :relations
-
+      attr_reader :name, :fields, :relations, :validations
 
       def has_controller?
         !! controller
@@ -75,6 +74,7 @@ module RailsLauncher
         @fields = []
         @relations = []
         @controller = {}
+        @validations = []
       end
 
       def string(name, opts = {})
@@ -117,6 +117,13 @@ module RailsLauncher
       def controller(opts = nil)
           return @controller if opts == nil
           @controller = optimize_opts(opts)
+      end
+
+      # Add validation
+      # This method accepts the same format as Rails ActiveModel's +validates+.
+      # All arguments are pasted into a generated model as it is.
+      def validates(*args)
+        @validations << Validation.new(args)
       end
 
       # Add belongs_to relationship
