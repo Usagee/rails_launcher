@@ -152,6 +152,25 @@ end
     its(:code) { should == ":name, {:presence=>true}" }
   end
 
+  describe 'routing definition' do
+    describe 'root' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+routes { root :to => 'welcome#index' }
+}}
+
+      subject(:root) { world.route_definition.root }
+      its(:code) { should == '{:to=>"welcome#index"}' }
+    end
+
+    describe 'match' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+routes { match 'photos/:id' => 'photos#show' }
+}}
+      subject(:matches) { world.route_definition.matches }
+      its('first.code') { should == '{"photos/:id"=>"photos#show"}' }
+    end
+  end
+
   def model(name)
     world.find_model(name)
   end

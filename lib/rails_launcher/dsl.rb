@@ -9,7 +9,7 @@ module RailsLauncher
     end
 
     class World
-      attr_reader :models
+      attr_reader :models, :route_definition
 
       def initialize
         @models = []
@@ -44,6 +44,15 @@ module RailsLauncher
       #
       def find_model(name)
         models.find { |m| m.name == name }
+      end
+
+      # Define routings
+      # If there are two routes blocks, the latter completely overrides the former.
+      #
+      def routes(&block)
+        routes = Routes.new
+        routes.instance_eval(&block) if block_given?
+        @route_definition = routes
       end
 
       private
@@ -151,6 +160,28 @@ module RailsLauncher
           opts[:only] = opts[:only] ? opts[:only] & rest_methods : rest_methods
         end
         opts
+      end
+    end
+
+    class Routes
+      attr_reader :matches
+
+      def initialize
+        @matches = []
+      end
+
+      # Define an action routed to /
+      def root(action = nil)
+        if action
+          @root = Route::Root.new(action)
+        else
+          @root
+        end
+      end
+
+      # Add a rails +match+ routing
+      def match(*options)
+        @matches << Route.new(options)
       end
     end
   end
