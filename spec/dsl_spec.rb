@@ -138,6 +138,20 @@ end
     end
   end
 
+
+  describe 'validation to a field of a model' do
+    let(:world) { RailsLauncher::DSL.new_world %Q{
+model(:user) do
+  string :name
+  string :email
+  validates :name, presence: true
+end
+}}
+
+    subject(:validation) { model(:user).validations.first }
+    its(:code) { should == ":name, {:presence=>true}" }
+  end
+
   def model(name)
     world.find_model(name)
   end
