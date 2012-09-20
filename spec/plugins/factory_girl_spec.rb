@@ -29,5 +29,14 @@ user.has_many posts
       it { should include 'factory :post' }
       it { should match '^\s*user$' }
     end
+
+    describe 'configure factory root directory to spec/factories' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+plugin '#{factory_girl_path}', root_path: 'spec/factories'
+model(:user) { string 'name' }
+}}
+      subject(:factory_file) { content_of_file('spec/factories/users.rb') }
+      it { should include 'factory :user' }
+    end
   end
 end

@@ -207,7 +207,7 @@ application 'test_application'
     end
 
     it { should have(1).plugins }
-    its('plugins.first') { should == ::RailsLauncher::Plugin::FactoryGirl }
+    its('plugins.first.class') { should == ::RailsLauncher::Plugin::FactoryGirl }
   end
 
   def model(name)

@@ -36,22 +36,26 @@ You get following two files.
 =end
 
 module RailsLauncher::Plugin
-  module FactoryGirl
-    def self.process(world, files)
+  class FactoryGirl
+    def initialize(options = {})
+      @root_path = options[:root_path] || 'test/factories'
+    end
+
+    def process(world, files)
       files + factories(world)
     end
 
-    def self.factories(world)
-      world.models.map { |m| FactoryFile.new(m) }
+    def factories(world)
+      world.models.map { |m| FactoryFile.new(@root_path, m) }
     end
 
     class FactoryFile < RailsLauncher::FileConstructor::FileEntity
-      def initialize(model)
-        @model = model
+      def initialize(root_path, model)
+        @root_path, @model = root_path, model
       end
 
       def path
-        "test/factories/#{@model.name.to_s.tableize}.rb"
+        "#{@root_path}/#{@model.name.to_s.tableize}.rb"
       end
 
       def file_content

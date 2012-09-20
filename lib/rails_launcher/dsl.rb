@@ -74,7 +74,7 @@ module RailsLauncher
       # Plugin top module should named like RailsLauncher::Plugin::SomePlugin
       def plugin(file, options = {})
         require file
-        @plugins << plugin_module(file)
+        @plugins << plugin_module(file).new(options)
       end
 
       private
