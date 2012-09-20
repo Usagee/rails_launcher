@@ -12,11 +12,16 @@ module RailsLauncher
     end
 
     class World
-      attr_reader :models, :route_definition, :controllers
+      attr_reader :models, :route_definition, :controllers, :application_name
 
       def initialize
         @models = []
         @controllers = []
+        @application_name = 'YOUR_APPLICATION_NAME'
+      end
+
+      def application(name)
+        @application_name = name
       end
 
       # Define new model

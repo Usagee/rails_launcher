@@ -1,7 +1,8 @@
 class RailsLauncher::FileConstructor
   class Routes < FileEntity
-    def initialize(definition)
+    def initialize(definition, name)
       @definition = definition
+      @name = name
     end
 
     def path
@@ -10,7 +11,7 @@ class RailsLauncher::FileConstructor
 
     def file_content
       %Q{
-YOUR_APPLICATION_NAME::Application.routes.draw do
+#{application_class_name}::Application.routes.draw do
 # No route to RESTful controllers is defined.
 # It is recommended to use conventional routes (https://github.com/tkawa/conventional_routes)
 
@@ -32,6 +33,10 @@ end
 
     def matches
       @definition.matches.map { |m| "matches #{m.code}" }.join("\n")
+    end
+
+    def application_class_name
+      @name.classify
     end
   end
 end

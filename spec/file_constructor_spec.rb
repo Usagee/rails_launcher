@@ -144,6 +144,7 @@ RUBY
     context 'routes.rb' do
       subject { content_of_file('config/routes.rb') }
 
+      it { should match 'IndexOnlyApplication::Application.routes' }
       it { should match_line 'root {:to=>"welcome#index"}' }
     end
   end

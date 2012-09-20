@@ -184,6 +184,13 @@ controller :welcome, only: :index
     end
   end
 
+  describe 'application name' do
+    let(:world) { RailsLauncher::DSL.new_world %Q{
+application 'test_application'
+}}
+    it { world.application_name.should == 'test_application' }
+  end
+
   def model(name)
     world.find_model(name)
   end

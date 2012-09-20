@@ -32,7 +32,7 @@ module RailsLauncher
 
     def routes_rb
       if @world.route_definition
-        [Routes.new(@world.route_definition)]
+        [Routes.new(@world.route_definition, @world.application_name)]
       else
         []
       end
