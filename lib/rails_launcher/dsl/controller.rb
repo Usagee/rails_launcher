@@ -18,6 +18,16 @@ module RailsLauncher
         options
       end
 
+      # return Array of GET actions, which needs a view
+      def actions_with_view
+        get = [:index, :show, :new, :edit]
+        if options[:only]
+          get & options[:only]
+        else
+          get
+        end
+      end
+
       def wrap_array(object)
         if object.respond_to?(:include?)
           object

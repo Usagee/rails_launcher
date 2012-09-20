@@ -1,0 +1,12 @@
+<%# Using template from indirect/haml-rails, distributed under Ruby License and MIT License %>
+%p#notice= notice
+
+<% for attribute in attributes -%>
+%p
+  %b <%= attribute.humanize %>:
+  = @<%= singular_table_name %>.<%= attribute %>
+<% end -%>
+
+= link_to 'Edit', edit_<%= singular_table_name %>_path(@<%= singular_table_name %>)
+\|
+= link_to 'Back', <%= index_helper %>_path
