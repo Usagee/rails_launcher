@@ -65,6 +65,7 @@ module RailsLauncher
         @validations << Validation.new(args)
       end
 
+      protected
       # Add belongs_to relationship
       # Do not use this function from DSL
       # called by other models
