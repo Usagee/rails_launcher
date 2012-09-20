@@ -88,7 +88,7 @@ module RailsLauncher
         @world = world
         @fields = []
         @relations = []
-        @controller = {}
+        @controller = Controller.new(plural_symbol, {}, self)
         @validations = []
       end
 
@@ -130,8 +130,8 @@ module RailsLauncher
       end
 
       def controller(opts = nil)
-          return @controller if opts == nil
-          @controller = optimize_opts(opts)
+        return @controller if opts == nil
+        @controller = Controller.new(plural_symbol, opts, self)
       end
 
       # Add validation
@@ -156,16 +156,6 @@ module RailsLauncher
       def has_many_through(other, medium)
         has_many(medium)
         @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
-      end
-
-      private
-
-      def optimize_opts(opts)
-        if opts[:except]
-          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - opts[:except]
-          opts[:only] = opts[:only] ? opts[:only] & rest_methods : rest_methods
-        end
-        opts
       end
     end
 
@@ -194,16 +184,29 @@ module RailsLauncher
     class Controller
       attr_reader :name, :options
 
-      def initialize(name, options = {})
+      def initialize(name, options = {}, model = nil)
         @name, @options = name, normalize(options)
       end
 
       def normalize(options)
         # +include+ is required in FileConstructor::Controller
-        unless options[:only].respond_to?(:include)
-          options[:only] = [options[:only]]
+        options[:only] = wrap_array(options[:only])
+        options[:except] = wrap_array(options[:except])
+        if options[:except]
+          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - options[:except]
+          options[:only] = options[:only] ? options[:only] & rest_methods : rest_methods
         end
         options
+      end
+
+      def wrap_array(object)
+        if object.respond_to?(:include?)
+          object
+        elsif object.nil?
+          nil
+        else
+          [object]
+        end
       end
     end
   end

@@ -1,8 +1,8 @@
 class RailsLauncher::FileConstructor
   class Controller < FileEntity
-    def initialize(name, opts)
-      @name = name.to_s
-      @opts = opts
+    def initialize(definition)
+      @name = definition.name.to_s.pluralize
+      @opts = definition.options
     end
 
     def path
@@ -17,7 +17,7 @@ class RailsLauncher::FileConstructor
     private
 
     def controller_name
-      @name.tableize + "_controller"
+      "#{@name}_controller"
     end
 
     def index_helper
@@ -29,7 +29,7 @@ class RailsLauncher::FileConstructor
     end
 
     def singular
-      @name
+      @name.singularize
     end
 
     def model
@@ -57,15 +57,10 @@ class RailsLauncher::FileConstructor
 
     class NoModel < Controller
       def initialize(definition)
-        @definition = definition
-        @opts = definition.options
+        super(definition)
+        @name = definition.name.to_s
       end
-
       private
-      def controller_name
-        "#{@definition.name}_controller"
-      end
-
       def template_path
         File.join(File.dirname(__FILE__), 'no_model_controller_template.rb.erb')
       end

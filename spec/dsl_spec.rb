@@ -112,7 +112,7 @@ model(:user) do
   #{definition}
 end
 }}
-    subject(:controller) { model(:user).controller[:only] }
+    subject(:controller) { model(:user).controller.options[:only] }
 
     context 'when only C and R are allowed' do
       let(:definition) { "controller only: [:index, :new, :create, :show]" }
@@ -180,7 +180,7 @@ controller :welcome, only: :index
       subject(:controller) { world.controllers.first }
 
       its(:name) { should == :welcome }
-      its(:options) { should == { only: [:index] } }
+      it { subject.options[:only].should == [:index] }
     end
   end
 
