@@ -1,4 +1,7 @@
 require 'active_support'
+require 'rails_launcher/dsl/routes'
+require 'rails_launcher/dsl/model'
+require 'rails_launcher/dsl/controller'
 
 module RailsLauncher
   module DSL
@@ -73,140 +76,6 @@ module RailsLauncher
           define_method(m.plural_symbol) { m }
         end
         m
-      end
-    end
-
-    class Model
-      attr_reader :name, :fields, :relations, :validations
-
-      def has_controller?
-        !! controller
-      end
-
-      def initialize(name, world)
-        @name = name
-        @world = world
-        @fields = []
-        @relations = []
-        @controller = Controller.new(plural_symbol, {}, self)
-        @validations = []
-      end
-
-      def string(name, opts = {})
-        @fields << ['string', name]
-      end
-
-      def plural_symbol
-        name.to_s.pluralize.to_sym
-      end
-
-      # Add has_one relationship to the given model
-      #
-      def has_one(model)
-        @relations << ['has_one', model.name]
-        model.belongs_to(self)
-      end
-
-      # Add has_many relationship to the given model
-      #
-      def has_many(model, opts = {})
-        if opts[:through]
-          medium = if opts[:through].respond_to?(:belongs_to)
-                     opts[:through]
-                   else
-                     m = @world.resolve_model(opts[:through])
-                   end
-          self.has_many_through(model, medium)
-          model.has_many_through(self, medium)
-        else
-          @relations << ['has_many', model.plural_symbol]
-          model.belongs_to(self)
-        end
-      end
-
-      # Specify that this model has no controller
-      def no_controller
-        @controller = nil
-      end
-
-      def controller(opts = nil)
-        return @controller if opts == nil
-        @controller = Controller.new(plural_symbol, opts, self)
-      end
-
-      # Add validation
-      # This method accepts the same format as Rails ActiveModel's +validates+.
-      # All arguments are pasted into a generated model as it is.
-      def validates(*args)
-        @validations << Validation.new(args)
-      end
-
-      # Add belongs_to relationship
-      # Do not use this function from DSL
-      # called by other models
-      #
-      def belongs_to(model)
-        @relations << ['belongs_to', model.name]
-      end
-
-      # Add has_many :through relationsip
-      # Do not use this function from DSL
-      # called by other models
-      #
-      def has_many_through(other, medium)
-        has_many(medium)
-        @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
-      end
-    end
-
-    class Routes
-      attr_reader :matches
-
-      def initialize
-        @matches = []
-      end
-
-      # Define an action routed to /
-      def root(action = nil)
-        if action
-          @root = Route::Root.new(action)
-        else
-          @root
-        end
-      end
-
-      # Add a rails +match+ routing
-      def match(*options)
-        @matches << Route.new(options)
-      end
-    end
-
-    class Controller
-      attr_reader :name, :options
-
-      def initialize(name, options = {}, model = nil)
-        @name, @options = name, normalize(options)
-      end
-
-      def normalize(options)
-        # +include+ is required in FileConstructor::Controller
-        options[:only] = wrap_array(options[:only])
-        options[:except] = wrap_array(options[:except])
-        if options[:except]
-          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - options[:except]
-          options[:only] = options[:only] ? options[:only] & rest_methods : rest_methods
-        end
-        options
-      end
-
-      def wrap_array(object)
-        if object.respond_to?(:include?)
-          object
-        elsif object.nil?
-          nil
-        else
-          [object]
-        end
       end
     end
   end
