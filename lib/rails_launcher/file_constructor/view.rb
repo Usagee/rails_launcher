@@ -10,10 +10,7 @@ class RailsLauncher::FileConstructor
     # define views set for a controller a model
     def self.model_controller(model, controller)
       actions = controller.actions_with_view.map do |action|
-        class_name = "#{action}_view".classify.to_sym
-        if constants.include?(class_name)
-          const_get(class_name).new(model, controller.name)
-        end
+        ModelView.new(model, controller.name, action)
       end
     end
 
@@ -30,9 +27,8 @@ class RailsLauncher::FileConstructor
     end
 
     class ModelView < View
-      def initialize(model, controller)
-        @model, @controller = model, controller
-        @action = 'index'
+      def initialize(model, controller, action)
+        @model, @controller, @action = model, controller, action
       end
 
       def file_content
@@ -55,11 +51,13 @@ class RailsLauncher::FileConstructor
       def attributes
         @model.fields.map { |type, name| name }
       end
-    end
 
-    class IndexView < ModelView
+      def index_helper
+        plural_table_name
+      end
+
       def template_path
-        File.join(File.dirname(__FILE__), 'view_templates/index.html.haml.erb')
+        File.join(File.dirname(__FILE__), "view_templates/#{@action}.html.haml.erb")
       end
     end
   end
