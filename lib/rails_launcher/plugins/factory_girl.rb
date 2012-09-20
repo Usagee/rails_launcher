@@ -55,7 +55,7 @@ module RailsLauncher::Plugin
       end
 
       def path
-        "#{@root_path}/#{@model.name.to_s.tableize}.rb"
+        "#{@root_path}/#{@model.table_name}.rb"
       end
 
       def file_content

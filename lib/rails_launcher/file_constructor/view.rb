@@ -46,7 +46,7 @@ class RailsLauncher::FileConstructor
       end
 
       def plural_table_name
-        @model.name.to_s.tableize
+        @model.table_name
       end
 
       def singular_table_name
