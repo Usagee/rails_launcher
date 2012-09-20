@@ -3,6 +3,7 @@ require 'rails_launcher/file_constructor/model'
 require 'rails_launcher/file_constructor/migration'
 require 'rails_launcher/file_constructor/controller'
 require 'rails_launcher/file_constructor/routes'
+require 'rails_launcher/file_constructor/view'
 
 module RailsLauncher
   class FileConstructor
@@ -12,7 +13,7 @@ module RailsLauncher
     end
 
     def file_entities
-      models + migrations + controllers + routes_rb
+      models + migrations + controllers + views + routes_rb
     end
 
     private
@@ -36,6 +37,10 @@ module RailsLauncher
       else
         []
       end
+    end
+
+    def views
+      @world.controllers.map { |c| View.no_model_controller(c) }.flatten
     end
   end
 end

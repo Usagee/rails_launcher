@@ -141,6 +141,11 @@ RUBY
       it { should match_line "def index" }
     end
 
+    context 'view file for a no-model controller' do
+      subject(:index_view) { content_of_file('app/views/welcome/index.html.haml') }
+      it { should match "welcome#index" }
+    end
+
     context 'routes.rb' do
       subject { content_of_file('config/routes.rb') }
 
