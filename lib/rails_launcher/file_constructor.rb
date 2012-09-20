@@ -2,6 +2,7 @@ require 'rails_launcher/file_constructor/file_entity'
 require 'rails_launcher/file_constructor/model'
 require 'rails_launcher/file_constructor/migration'
 require 'rails_launcher/file_constructor/controller'
+require 'rails_launcher/file_constructor/routes'
 
 module RailsLauncher
   class FileConstructor
@@ -11,7 +12,7 @@ module RailsLauncher
     end
 
     def file_entities
-      models + migrations + controllers
+      models + migrations + controllers + routes_rb
     end
 
     private
@@ -27,6 +28,14 @@ module RailsLauncher
     def controllers
       @world.models.map { |m| m.has_controller? ? Controller.new(m.name, m.controller) : nil }.compact +
         @world.controllers.map { |c| Controller::NoModel.new(c) }
+    end
+
+    def routes_rb
+      if @world.route_definition
+        [Routes.new(@world.route_definition)]
+      else
+        []
+      end
     end
   end
 end
