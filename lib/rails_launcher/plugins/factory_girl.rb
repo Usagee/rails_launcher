@@ -36,7 +36,61 @@ You get following two files.
 =end
 
 module RailsLauncher::Plugin
-  class FactoryGirl
-    
+  module FactoryGirl
+    def self.process(world, files)
+      files + factories(world)
+    end
+
+    def self.factories(world)
+      world.models.map { |m| FactoryFile.new(m) }
+    end
+
+    class FactoryFile < RailsLauncher::FileConstructor::FileEntity
+      def initialize(model)
+        @model = model
+      end
+
+      def path
+        "test/factories/#{@model.name.to_s.tableize}.rb"
+      end
+
+      def file_content
+        %Q{
+FactoryGirl.define do
+  factory :#{@model.name} do
+#{attributes}
+  end
+end
+}.lstrip
+      end
+
+      def attributes
+        @model.fields.map do |type, name|
+          "      #{name}#{default(type)}"
+        end.join("\n")
+      end
+
+      def default(type)
+        object = {
+          'string'    => 'TestString',
+          'text'      => 'TestText',
+          'integer'   => 42,
+          'float'     => 42.0,
+          'decimal'   => 42,
+          'datetime'  => "2012-01-01 00:00:00 +0000",
+          'timestamp' => "2012-01-01 00:00:00 +0000",
+          'time'      => '00:00:00 +0000',
+          'date'      => '2012-01-01',
+          'binary'    => 0,
+          'boolean'   => false
+        }[type]
+
+        if object
+          ' ' + object.inspect
+        else
+          ''
+        end
+      end
+    end
   end
 end
