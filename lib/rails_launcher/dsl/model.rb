@@ -29,6 +29,10 @@ module RailsLauncher
         name.to_s.pluralize.to_sym
       end
 
+      def table_name
+        name.to_s.tableize
+      end
+
       # Add has_one relationship to the given model
       #
       def has_one(model)

@@ -12,11 +12,12 @@ module RailsLauncher
     end
 
     class World
-      attr_reader :models, :route_definition, :controllers, :application_name
+      attr_reader :models, :route_definition, :controllers, :application_name, :plugins
 
       def initialize
         @models = []
         @controllers = []
+        @plugins = []
         @application_name = 'YOUR_APPLICATION_NAME'
       end
 
@@ -69,6 +70,13 @@ module RailsLauncher
         @controllers << Controller.new(name, opts)
       end
 
+      # Include plugin
+      # Plugin top module should named like RailsLauncher::Plugin::SomePlugin
+      def plugin(file, options = {})
+        require file
+        @plugins << plugin_module(file).new(options)
+      end
+
       private
       def new_model(name, &block)
         m = Model.new(name, self)
@@ -81,6 +89,11 @@ module RailsLauncher
           define_method(m.plural_symbol) { m }
         end
         m
+      end
+
+      def plugin_module(file)
+        filename = File.basename(file, File.extname(file))
+        RailsLauncher::Plugin.const_get(filename.classify.to_sym)
       end
     end
   end

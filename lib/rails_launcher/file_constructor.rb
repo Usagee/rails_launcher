@@ -12,7 +12,18 @@ module RailsLauncher
       @migration_id = 0
     end
 
+    # Plugins extend generated core files
+    # Plugin#process should receive the world defined by DSL and generated files,
+    # then return modified files.
     def file_entities
+      @world.plugins.reduce(core_file_entities) do |files, plugin|
+        plugin.process(@world, files)
+      end
+    end
+
+    # RailsLauncher generates core files
+    # models, migrations for them, controllers, very simple views, and routes.rb
+    def core_file_entities
       models + migrations + controllers + views + routes_rb
     end
 

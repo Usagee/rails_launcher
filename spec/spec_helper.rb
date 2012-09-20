@@ -25,3 +25,15 @@ end
 def sample_world(name)
   RailsLauncher::DSL.new_world File.read(sample_path(name))
 end
+
+def content_of_file(path_regexp)
+  matches = constructor.file_entities.select { |f| f.path.match path_regexp }
+  case matches.size
+  when 0
+    fail("#{path_regexp} is expected to match a file constructed, but nothing matched")
+  when 1
+    return matches.first.file_content
+  else
+    fail("#{path_regexp} matches more than a file. " + matches.map(&:path).join(', '))
+  end
+end

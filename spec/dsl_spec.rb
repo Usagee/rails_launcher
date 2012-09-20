@@ -200,6 +200,16 @@ application 'test_application'
     it { world.application_name.should == 'test_application' }
   end
 
+  describe 'plugin' do
+    subject(:world) do
+      path = File.expand_path(File.join(__FILE__, '../../lib/rails_launcher/plugins/factory_girl.rb'))
+      RailsLauncher::DSL.new_world %Q{plugin '#{path}'}
+    end
+
+    it { should have(1).plugins }
+    its('plugins.first.class') { should == ::RailsLauncher::Plugin::FactoryGirl }
+  end
+
   def model(name)
     world.find_model(name)
   end

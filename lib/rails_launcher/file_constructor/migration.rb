@@ -5,14 +5,14 @@ class RailsLauncher::FileConstructor
     end
 
     def path
-      "db/migrate/%03d_create_%s.rb" % [@id, table_name]
+      "db/migrate/%03d_create_%s.rb" % [@id, @model.table_name]
     end
 
     def file_content
       <<RUBY
 class Create#{class_table_name} < ActiveRecord::Migration
   def change
-    create_table :#{table_name} do |t|
+    create_table :#{@model.table_name} do |t|
 #{ columns }
       t.timestamps
     end
@@ -22,10 +22,6 @@ RUBY
     end
 
     private
-    def table_name
-      @model.name.to_s.tableize
-    end
-
     def class_table_name
       @model.name.to_s.classify.pluralize
     end
@@ -37,7 +33,7 @@ RUBY
     end
 
     def indices
-      belonging_relations.map { |rel| "    add_index :#{table_name}, :#{rel[1]}_id\n" }.join ''
+      belonging_relations.map { |rel| "    add_index :#{@model.table_name}, :#{rel[1]}_id\n" }.join ''
     end
 
     def belonging_relations
