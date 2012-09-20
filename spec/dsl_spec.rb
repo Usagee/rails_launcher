@@ -112,7 +112,7 @@ model(:user) do
   #{definition}
 end
 }}
-    subject(:controller) { model(:user).controller[:only] }
+    subject(:controller) { model(:user).controller.options[:only] }
 
     context 'when only C and R are allowed' do
       let(:definition) { "controller only: [:index, :new, :create, :show]" }
@@ -150,6 +150,38 @@ end
 
     subject(:validation) { model(:user).validations.first }
     its(:code) { should == ":name, {:presence=>true}" }
+  end
+
+  describe 'routing definition' do
+    describe 'root' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+routes { root :to => 'welcome#index' }
+}}
+
+      subject(:root) { world.route_definition.root }
+      its(:code) { should == '{:to=>"welcome#index"}' }
+    end
+
+    describe 'match' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+routes { match 'photos/:id' => 'photos#show' }
+}}
+      subject(:matches) { world.route_definition.matches }
+      its('first.code') { should == '{"photos/:id"=>"photos#show"}' }
+    end
+  end
+
+  describe 'a controller without a corresponding model' do
+    describe 'controller' do
+      let(:world) { RailsLauncher::DSL.new_world %Q{
+controller :welcome, only: :index
+ }}
+
+      subject(:controller) { world.controllers.first }
+
+      its(:name) { should == :welcome }
+      it { subject.options[:only].should == [:index] }
+    end
   end
 
   def model(name)

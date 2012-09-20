@@ -1,9 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-class RailsLauncher::FileConstructor
-  describe Controller do
+module RailsLauncher
+  describe FileConstructor::Controller do
     # workaround
-    let(:controller) { described_class.new('test', opts) }
+    let(:controller) { described_class.new(DSL::Controller.new(:test, opts, :fake_model)) }
 
     context 'with no option' do
       let(:opts) { {} }

@@ -1,4 +1,7 @@
 require 'active_support'
+require 'rails_launcher/dsl/routes'
+require 'rails_launcher/dsl/model'
+require 'rails_launcher/dsl/controller'
 
 module RailsLauncher
   module DSL
@@ -9,10 +12,11 @@ module RailsLauncher
     end
 
     class World
-      attr_reader :models
+      attr_reader :models, :route_definition, :controllers
 
       def initialize
         @models = []
+        @controllers = []
       end
 
       # Define new model
@@ -46,6 +50,20 @@ module RailsLauncher
         models.find { |m| m.name == name }
       end
 
+      # Define routings
+      # If there are two routes blocks, the latter completely overrides the former.
+      #
+      def routes(&block)
+        routes = Routes.new
+        routes.instance_eval(&block) if block_given?
+        @route_definition = routes
+      end
+
+      # Define a model-free controller
+      def controller(name, opts)
+        @controllers << Controller.new(name, opts)
+      end
+
       private
       def new_model(name, &block)
         m = Model.new(name, self)
@@ -58,99 +76,6 @@ module RailsLauncher
           define_method(m.plural_symbol) { m }
         end
         m
-      end
-    end
-
-    class Model
-      attr_reader :name, :fields, :relations, :validations
-
-      def has_controller?
-        !! controller
-      end
-
-      def initialize(name, world)
-        @name = name
-        @world = world
-        @fields = []
-        @relations = []
-        @controller = {}
-        @validations = []
-      end
-
-      def string(name, opts = {})
-        @fields << ['string', name]
-      end
-
-      def plural_symbol
-        name.to_s.pluralize.to_sym
-      end
-
-      # Add has_one relationship to the given model
-      #
-      def has_one(model)
-        @relations << ['has_one', model.name]
-        model.belongs_to(self)
-      end
-
-      # Add has_many relationship to the given model
-      #
-      def has_many(model, opts = {})
-        if opts[:through]
-          medium = if opts[:through].respond_to?(:belongs_to)
-                     opts[:through]
-                   else
-                     m = @world.resolve_model(opts[:through])
-                   end
-          self.has_many_through(model, medium)
-          model.has_many_through(self, medium)
-        else
-          @relations << ['has_many', model.plural_symbol]
-          model.belongs_to(self)
-        end
-      end
-
-      # Specify that this model has no controller
-      def no_controller
-        @controller = nil
-      end
-
-      def controller(opts = nil)
-          return @controller if opts == nil
-          @controller = optimize_opts(opts)
-      end
-
-      # Add validation
-      # This method accepts the same format as Rails ActiveModel's +validates+.
-      # All arguments are pasted into a generated model as it is.
-      def validates(*args)
-        @validations << Validation.new(args)
-      end
-
-      # Add belongs_to relationship
-      # Do not use this function from DSL
-      # called by other models
-      #
-      def belongs_to(model)
-        @relations << ['belongs_to', model.name]
-      end
-
-      # Add has_many :through relationsip
-      # Do not use this function from DSL
-      # called by other models
-      #
-      def has_many_through(other, medium)
-        has_many(medium)
-        @relations << ['has_many', other.plural_symbol, through: medium.plural_symbol]
-      end
-
-      private
-
-      def optimize_opts(opts)
-        if opts[:except]
-          rest_methods = [:index, :show, :new, :create, :edit, :update, :destroy] - opts[:except]
-          opts[:only] = opts[:only] ? opts[:only] & rest_methods : rest_methods
-        end
-        opts
       end
     end
   end
