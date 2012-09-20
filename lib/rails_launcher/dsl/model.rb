@@ -16,8 +16,13 @@ module RailsLauncher
         @validations = []
       end
 
-      def string(name, opts = {})
-        @fields << ['string', name]
+      # fields
+      # Fields are for define database table columns.
+      # These methods are which Rails' +TableDefinition+ accepts.
+      [:primary_key, :string, :text, :integer, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean].each do |key|
+        define_method(key) do |name|
+          @fields << [key.to_s, name.to_s]
+        end
       end
 
       def plural_symbol

@@ -152,6 +152,15 @@ end
     its(:code) { should == ":name, {:presence=>true}" }
   end
 
+  describe 'integer field' do
+    let(:world) { RailsLauncher::DSL.new_world %Q{
+model(:user) { integer :age }
+}}
+    subject(:user) { model(:user) }
+    it { should have_field ['integer', 'age'] }
+  end
+
+
   describe 'routing definition' do
     describe 'root' do
       let(:world) { RailsLauncher::DSL.new_world %Q{
