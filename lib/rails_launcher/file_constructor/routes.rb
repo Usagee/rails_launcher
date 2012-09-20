@@ -11,6 +11,9 @@ class RailsLauncher::FileConstructor
     def file_content
       %Q{
 YOUR_APPLICATION_NAME::Application.routes.draw do
+# No route to RESTful controllers is defined.
+# It is recommended to use conventional routes (https://github.com/tkawa/conventional_routes)
+
 #{root}
 #{matches}
 end
