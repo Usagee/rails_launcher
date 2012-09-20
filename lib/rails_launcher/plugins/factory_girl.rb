@@ -65,9 +65,21 @@ end
       end
 
       def attributes
+        (fields + associations).map { |l| " " * 6 + l }.join("\n")
+      end
+
+      def fields
         @model.fields.map do |type, name|
-          "      #{name}#{default(type)}"
-        end.join("\n")
+          "#{name}#{default(type)}"
+        end
+      end
+
+      def associations
+        belonged_models(@model.relations)
+      end
+
+      def belonged_models(relations)
+        relations.select { |type, model| type == 'belongs_to' }.map { |_, model| model.to_s }
       end
 
       def default(type)
