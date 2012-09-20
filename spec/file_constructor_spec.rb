@@ -54,14 +54,21 @@ RUBY
       it { should match_line "def destroy" }
     end
 
-    context 'view files' do
-      subject(:index_view) { content_of_file('app/views/users/index.html.haml') }
-      it { should match "Listing users" }
-      it { should match_line '- @users.each do |user|' }
-      it { should match_line '%td= user.user_name' }
-      it { should match_line "%td= link_to 'Show', user" }
-      it { should match "link_to 'Edit'" }
-      it { should match %q{%td= link_to 'Destroy', user} }
+    describe 'view files' do
+      describe 'index' do
+        subject(:index_view) { content_of_file('app/views/users/index.html.haml') }
+        it { should match "Listing users" }
+        it { should match_line '- @users.each do |user|' }
+        it { should match_line '%td= user.user_name' }
+        it { should match_line "%td= link_to 'Show', user" }
+        it { should match "link_to 'Edit'" }
+        it { should match %q{%td= link_to 'Destroy', user} }
+      end
+
+      describe 'form' do
+        subject(:form_view) { content_of_file('app/views/users/_form.html.haml') }
+        it { should match "= f.submit 'Save'" }
+      end
     end
   end
 

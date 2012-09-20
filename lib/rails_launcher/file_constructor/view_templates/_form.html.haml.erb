@@ -9,8 +9,8 @@
 
 <% for attribute in attributes -%>
   .field
-    = f.label :<%= attribute.name %>
-    = f.<%= attribute.field_type %> :<%= attribute.name %>
+    = f.label :<%= attribute %>
+    = f.text_field :<%= attribute %>
 <% end -%>
   .actions
     = f.submit 'Save'

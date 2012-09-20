@@ -9,9 +9,14 @@ class RailsLauncher::FileConstructor
 
     # define views set for a controller a model
     def self.model_controller(model, controller)
-      actions = controller.actions_with_view.map do |action|
+      actions = controller.actions_with_view
+      if actions.include?(:new) || actions.include?(:edit)
+        form = ModelView.new(model, controller.name, '_form')
+      end
+      action_views = actions.map do |action|
         ModelView.new(model, controller.name, action)
       end
+      action_views << form
     end
 
     def initialize(controller, action)
