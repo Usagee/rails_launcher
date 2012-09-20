@@ -13,6 +13,12 @@ module RailsLauncher
     end
 
     def file_entities
+      @world.plugins.reduce(core_file_entities) do |files, plugin|
+        plugin.process(@world, files)
+      end
+    end
+
+    def core_file_entities
       models + migrations + controllers + views + routes_rb
     end
 
