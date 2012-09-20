@@ -40,7 +40,8 @@ module RailsLauncher
     end
 
     def views
-      @world.controllers.map { |c| View.no_model_controller(c) }.flatten
+      @world.controllers.map { |c| View.no_model_controller(c) }.flatten +
+        @world.models.map { |m| m.has_controller? ? View.model_controller(m, m.controller) : nil }.flatten.compact
     end
   end
 end

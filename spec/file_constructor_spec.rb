@@ -3,7 +3,7 @@ require 'spec_helper'
 # Expect that actual contains a line matching expected
 RSpec::Matchers.define :match_line do |expected|
   match do |actual|
-    actual.match /^\s*#{expected}$/
+    actual.split("\n").map(&:strip).any? { |line| line.match expected }
   end
 end
 
@@ -52,6 +52,16 @@ RUBY
       it { should match_line "def create" }
       it { should match_line "def update" }
       it { should match_line "def destroy" }
+    end
+
+    context 'view files' do
+      subject(:index_view) { content_of_file('app/views/users/index.html.haml') }
+      it { should match "Listing users" }
+      it { should match_line '- @users.each do |user|' }
+      it { should match_line '%td= user.user_name' }
+      it { should match_line "%td= link_to 'Show', user" }
+      it { should match "link_to 'Edit'" }
+      it { should match %q{%td= link_to 'Destroy', user} }
     end
   end
 
