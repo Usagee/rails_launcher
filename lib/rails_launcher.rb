@@ -6,6 +6,7 @@ require "rails_launcher/file_constructor"
 require "rails_launcher/generator"
 require "rails_launcher/validation"
 require "rails_launcher/route"
+require "rails_launcher/plugin"
 
 module RailsLauncher
   # Your code goes here...
