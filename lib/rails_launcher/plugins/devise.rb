@@ -111,7 +111,7 @@ module RailsLauncher
         end
 
         def file_content
-          File.read(FILES.call("locale.#{@locale}.yml"))
+          File.read(FILES.call("#{@locale}.yml"))
         end
       end
 
