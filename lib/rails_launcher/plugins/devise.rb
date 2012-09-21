@@ -153,11 +153,24 @@ module RailsLauncher
           end
         end
 
+        def accessible_columns
+          columns = []
+          if @options.database_authenticatable?
+            columns += [:email, :password, :password_confirmation]
+          end
+
+          if @options.rememberable?
+            columns += [:remember_me]
+          end
+
+          columns.map(&:inspect).join(", ")
+        end
+
         def file_content
             %Q{
 class User < ActiveRecord::Base
   devise #{modules}
-  attr_accessible :email, :password, :password_confirmation
+  attr_accessible #{accessible_columns}
 
   #{omniauth_method}
 end

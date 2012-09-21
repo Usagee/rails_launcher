@@ -6,6 +6,12 @@ RSpec::Matchers.define :create_file do |expected|
   end
 end
 
+RSpec::Matchers.define :include_in_line do |*expected|
+  match do |actual|
+    actual.split("\n").any? { |line| expected.all? { |token| line.include? token } }
+  end
+end
+
 module RailsLauncher
   describe 'Devise plugin' do
     let(:devise_path) { File.expand_path(File.join(__FILE__, '../../../lib/rails_launcher/plugins/devise.rb')) }
@@ -82,6 +88,22 @@ plugin '#{ devise_path }', database_authenticatable: true, mailer_sender: 'hello
 
       it { should include 'hello@example.com' }
       it { should_not include "please-change-me-at-config-initializers-devise@example.com" }
+    end
+
+    describe 'remember me' do
+      let(:world) { DSL.new_world %Q{
+plugin '#{ devise_path }', database_authenticatable: true, rememberable: true
+}}
+
+      describe 'app/models/user.rb' do
+        subject(:file) { content_of_file('app/models/user.rb') }
+        it { should include_in_line 'attr_accessible', ':remember_me' }
+      end
+
+      describe 'db/migrate/xxx_devise_create_users.rb' do
+        subject(:file) { content_of_file('db/migrate/\d*_devise_create_users.rb') }
+        it { should match_line 't.datetime :remember_created_at' }
+      end
     end
   end
 end
