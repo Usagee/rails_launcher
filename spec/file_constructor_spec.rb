@@ -1,12 +1,5 @@
 require 'spec_helper'
 
-# Expect that actual contains a line matching expected
-RSpec::Matchers.define :match_line do |expected|
-  match do |actual|
-    actual.split("\n").map(&:strip).any? { |line| line.match expected }
-  end
-end
-
 describe RailsLauncher::FileConstructor do
   let(:world) { sample_world(world_name) }
 

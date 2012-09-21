@@ -37,3 +37,10 @@ def content_of_file(path_regexp)
     fail("#{path_regexp} matches more than a file. " + matches.map(&:path).join(', '))
   end
 end
+
+# Expect that actual contains a line matching expected
+RSpec::Matchers.define :match_line do |expected|
+  match do |actual|
+    actual.split("\n").map(&:strip).any? { |line| line.match expected }
+  end
+end
