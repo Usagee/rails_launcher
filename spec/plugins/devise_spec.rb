@@ -45,5 +45,17 @@ plugin '#{ devise_path }', database_authenticatable: true
         it { should_not match_line 't.datetime :remember_created_at'  }
       end
     end
+
+    describe 'omniauthable with twitter and facebook' do
+      let(:world) { DSL.new_world %Q{
+plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitter, :facebook]
+}}
+
+      describe 'app/models/user.rb' do
+        subject(:file) { content_of_file('app/models/user.rb') }
+        it { should include ':omniauthable' }
+        it { should include 'def self.find_for_oauth(auth, sign_in_resource = nil)' }
+      end
+    end
   end
 end

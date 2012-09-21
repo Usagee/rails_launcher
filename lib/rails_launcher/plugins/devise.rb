@@ -121,11 +121,28 @@ module RailsLauncher
           @options.keys.map { |key| key.to_sym.inspect }.join(", ")
         end
 
+        def omniauth_method
+          if @options[:omniauthable]
+            %Q{def self.find_for_oauth(auth, sign_in_resource = nil)
+    user = User.where(:provider => auth.provider, :uid => auth.uid).first
+    unless user
+      user = User.create(email: auth.info.email || '', password:Devise.friendly_token[0,20]) do |u|
+        u.provider = auth.provider
+        u.uid      = auth.uid
+      end
+    end
+    user
+  end}
+          end
+        end
+
         def file_content
             %Q{
 class User < ActiveRecord::Base
   devise #{modules}
   attr_accessible :email, :password, :password_confirmation
+
+  #{omniauth_method}
 end
 }
         end
