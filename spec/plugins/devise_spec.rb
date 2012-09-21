@@ -85,8 +85,8 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         it { should include_in_line 'devise_for', ':omniauth_callbacks => "users/omniauth_callbacks"' }
       end
 
-      describe 'app/controllers/users/omniauth_callbacks_conroller.rb' do
-        subject(:file) { content_of_file('app/controllers/users/omniauth_callbacks_conroller.rb') }
+      describe 'app/controllers/users/omniauth_callbacks_controller.rb' do
+        subject(:file) { content_of_file('app/controllers/users/omniauth_callbacks_controller.rb') }
 
         it { should include 'class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController' }
         it { should include 'def twitter' }

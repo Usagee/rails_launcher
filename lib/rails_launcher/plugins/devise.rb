@@ -337,7 +337,7 @@ end
         end
 
         def path
-          'app/controllers/users/omniauth_callbacks_conroller.rb'
+          'app/controllers/users/omniauth_callbacks_controller.rb'
         end
 
         def provider_methods
