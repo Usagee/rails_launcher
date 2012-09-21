@@ -5,9 +5,9 @@ require 'rails_launcher/dsl/controller'
 
 module RailsLauncher
   module DSL
-    def self.new_world(text)
+    def self.new_world(ruby_template_definition)
       w = World.new
-      w.instance_eval(text)
+      w.instance_eval(ruby_template_definition)
       w
     end
 

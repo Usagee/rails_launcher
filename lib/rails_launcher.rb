@@ -1,4 +1,4 @@
-require 'active_support/core_ext/string'
+require 'active_support/all'
 
 require "rails_launcher/version"
 require "rails_launcher/dsl"

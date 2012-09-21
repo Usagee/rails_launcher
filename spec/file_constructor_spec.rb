@@ -160,7 +160,7 @@ RUBY
       subject { content_of_file('config/routes.rb') }
 
       it { should match 'IndexOnlyApplication::Application.routes' }
-      it { should match_line 'root {:to=>"welcome#index"}' }
+      it { should include 'root({:to=>"welcome#index"})' }
     end
 
     context 'when no routing is explicitly defined' do

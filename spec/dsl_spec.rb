@@ -160,6 +160,13 @@ model(:user) { integer :age }
     it { should have_field ['integer', 'age'] }
   end
 
+  describe 'text field' do
+    let(:world) { RailsLauncher::DSL.new_world %Q{
+model(:user) { text :age }
+}}
+    subject(:user) { model(:user) }
+    it { should have_field ['text', 'age'] }
+  end
 
   describe 'routing definition' do
     describe 'root' do

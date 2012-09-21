@@ -38,7 +38,6 @@ class <%= controller_name.classify %> < ApplicationController
 <% if update? %>
   def update
     <%= find %>
-    @<%= singular %> = <%= model %>.find(params[:id])
 
     if @<%= singular %>.update_attributes(params[:<%= singular %>])
       redirect_to @<%= singular %>, notice: '<%= human_name %> was successfully updated.'

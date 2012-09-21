@@ -29,7 +29,7 @@ end
 
     def root
       if r = @definition.try(:root)
-        "root #{r.code}\n"
+        "root(#{r.code})\n"
       else
         ""
       end
@@ -37,12 +37,13 @@ end
 
     def matches
       if @definition && @definition.matches
-        @definition.matches.map { |m| "matches #{m.code}" }.join("\n")
+        @definition.matches.map { |m| "match #{m.code}" }.join("\n")
       end
     end
 
     def application_class_name
-      @name.classify
+      # classify works incorrectly when name ends with 's'
+      @name.camelize
     end
   end
 end
