@@ -122,5 +122,17 @@ plugin '#{ devise_path }', database_authenticatable: true, rememberable: true
         it { should match_line 't.datetime :remember_created_at' }
       end
     end
+
+    context 'when User model is defined using DSL' do
+      let(:world) { DSL.new_world %Q{
+plugin '#{ devise_path }', database_authenticatable: true
+model(:user) { string :nickname }
+}}
+
+      describe 'app/models/user.rb' do
+        subject(:file) { content_of_file('app/models/user.rb') }
+        it { should include_in_line 'attr_accessible', ':nickname', ':email' }
+      end
+    end
   end
 end

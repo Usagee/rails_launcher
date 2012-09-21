@@ -78,11 +78,12 @@ module RailsLauncher
       end
 
       def model(files)
-        if files.find { |f| f.path == 'app/models/user.rb' }
-          files
+        if idx = files.find_index { |f| f.path == 'app/models/user.rb' }
+          files[idx] = UserModel.new(files[idx], @options)
         else
-          files << UserModel.new(@options) << UserMigration.new(@migration_id_generator, @options)
+          files << UserModel.new(nil, @options) << UserMigration.new(@migration_id_generator, @options)
         end
+        files
       end
 
       def initializer
@@ -135,7 +136,13 @@ module RailsLauncher
       end
 
       class UserModel < FileConstructor::FileEntity
-        def initialize(options)
+        def initialize(existing, options)
+          if existing
+            file = existing.file_content
+            @existing_accessible_columns = file.match(/attr_accessible (.*)$/).try(:[], 1) + ", "
+          else
+            @existing_accessible_columns = ''
+          end
           @options = options
         end
 
@@ -172,7 +179,7 @@ module RailsLauncher
             columns += [:remember_me]
           end
 
-          columns.map(&:inspect).join(", ")
+          @existing_accessible_columns.strip + columns.map(&:inspect).join(", ")
         end
 
         def file_content
