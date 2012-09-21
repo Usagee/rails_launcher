@@ -47,3 +47,51 @@ This plugin creates following files.
 plugin 'devise.rb', database_authenticatable: true, registerable: true, omniauthable: [:twitter, :facebook]
 
 =end
+
+module RailsLauncher
+  module Plugin
+    class Devise
+      FILES = lambda { |name| File.join(__FILE__, "../devise/#{name}") }
+
+      def initialize(options = {})
+        @options = options
+      end
+
+      def process(world, files)
+        files + static_files + initializer
+      end
+
+      def static_files
+        [Locale.new(:ja), Locale.new(:en)]
+      end
+
+      def initializer
+        file = FileConstructor::FileEntity.new
+        class << file
+          def path
+            "config/initializers/devise.rb"
+          end
+
+          def file_content
+            ERB.new(File.read(FILES.call("initializer.rb.erb"))).result binding
+          end
+        end
+        [file]
+      end
+
+      class Locale < FileConstructor::FileEntity
+        def initialize(locale)
+          @locale = locale
+        end
+
+        def path
+          "config/locales/devise.#{@locale}.yml"
+        end
+
+        def file_content
+          File.read(FILES.call("locale.#{@locale}.yml"))
+        end
+      end
+    end
+  end
+end
