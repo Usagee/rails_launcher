@@ -37,7 +37,7 @@ end
 
     def matches
       if @definition && @definition.matches
-        @definition.matches.map { |m| "matches #{m.code}" }.join("\n")
+        @definition.matches.map { |m| "match #{m.code}" }.join("\n")
       end
     end
 

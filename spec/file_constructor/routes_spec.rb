@@ -5,17 +5,23 @@ module RailsLauncher
     let(:routes) do
       route = DSL::Routes.new
       route.root to: 'welcome#index'
+      route.match "login", to: "sessions#create"
       route
     end
 
-    describe 'arguments of root has parenthesis' do
-      subject(:model_file) { described_class.new(routes, 'your_application_name').file_content }
-      it { should include 'root({:to=>"welcome#index"})' }
+    specify 'arguments of root has parenthesis' do
+      content = described_class.new(routes, 'your_application_name').file_content
+      content.should include 'root({:to=>"welcome#index"})'
     end
 
-    describe 'application name ends with s' do
-      subject(:model_file) { described_class.new(routes, 'easy_sns').file_content }
-      it { should include 'EasySns::Application.routes' }
+    specify 'application name ends with s' do
+      content = described_class.new(routes, 'easy_sns').file_content
+      content.should include 'EasySns::Application.routes'
+    end
+
+    specify 'arguments of match not necessarily parenthesis' do
+      content = described_class.new(routes, 'your_application_name').file_content
+      content.should include 'match "login", {:to=>"sessions#create"}'
     end
   end
 end
