@@ -51,7 +51,7 @@ plugin 'devise.rb', database_authenticatable: true, registerable: true, omniauth
 module RailsLauncher
   module Plugin
     class Devise
-      FILES = lambda { |name| File.join(__FILE__, "../devise/#{name}") }
+      FILES = lambda { |name| File.join(File.dirname(__FILE__), "devise", name) }
 
       def initialize(options = {})
         @options = Option.new(options)
@@ -81,17 +81,7 @@ module RailsLauncher
       end
 
       def initializer
-        file = FileConstructor::FileEntity.new
-        class << file
-          def path
-            "config/initializers/devise.rb"
-          end
-
-          def file_content
-            ERB.new(File.read(FILES.call("initializer.rb.erb"))).result binding
-          end
-        end
-        [file]
+        [Initializer.new(@options)]
       end
 
       class Locale < FileConstructor::FileEntity
@@ -124,6 +114,10 @@ module RailsLauncher
           [:database_authenticatable, :registerable, :recoverable, :rememberable,
           :trackable, :validatable, :token_authenticatable, :confirmable,
           :lockable, :timeoutable, :omniauthable] & @hash.keys
+        end
+
+        def omniauth_providers
+          @hash[:omniauthable] || []
         end
       end
 
@@ -244,6 +238,37 @@ class DeviseCreateUsers < ActiveRecord::Migration
   end
 end
 }
+        end
+      end
+
+      class Initializer < FileConstructor::FileEntity
+        def initialize(options)
+          @options = options
+        end
+
+        def path
+          "config/initializers/devise.rb"
+        end
+
+        def file_content
+          ERB.new(File.read(FILES.call("initializer.rb.erb"))).result binding
+        end
+
+        def requirements
+          @options.omniauth_providers.map { |provider|
+            %Q{require "omniauth-#{provider}"}
+          }.join("\n")
+        end
+
+        def additional_configs
+          @options.omniauth_providers.map { |provider|
+            %Q{config.omniauth :#{provider}, ENV['#{provider.upcase}_KEY'], ENV['#{provider.upcase}_SECRET']}
+          }.join("\n  ")
+        end
+
+        # TODO
+        def mailer_sender
+          "please-change-me-at-config-initializers-devise@example.com"
         end
       end
     end

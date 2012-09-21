@@ -62,6 +62,15 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         it { should match_line 't.string :provider' }
         it { should match_line 't.string :uid' }
       end
+
+      describe 'config/initializers/devise.rb' do
+        subject(:file) { content_of_file('config/initializers/devise.rb') }
+        it { should match_line 'require "omniauth-twitter"' }
+        it { should match_line 'require "omniauth-facebook"' }
+
+        it { should include %q{config.omniauth :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET']} }
+        it { should include %q{config.omniauth :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET']} }
+      end
     end
   end
 end
