@@ -51,6 +51,7 @@ plugin 'devise.rb', database_authenticatable: true, registerable: true, omniauth
 module RailsLauncher
   module Plugin
     class Devise
+      FAKE_MODEL = DSL::Model.new(:user, nil)
       FILES = lambda { |name| File.join(File.dirname(__FILE__), "devise", name) }
 
       def initialize(options = {})
@@ -78,10 +79,16 @@ module RailsLauncher
       end
 
       def model(world, files)
+        model = world.find_model(:user)
         if idx = files.find_index { |f| f.path == 'app/models/user.rb' }
-          files[idx] = UserModel.new(world.find_model(:user), @options)
+          files[idx] = UserModel.new(model, @options)
         else
-          files << UserModel.new(nil, @options) << UserMigration.new(@migration_id_generator, @options)
+          files << UserModel.new(nil, @options)
+        end
+        if migration = files.find_index { |f| f.path.match 'db/migrate/\d*_create_users.rb' }
+          files[migration] = UserMigration.new(model, @migration_id_generator, @options)
+        else
+          files << UserMigration.new(nil, @migration_id_generator, @options)
         end
         files
       end
@@ -137,7 +144,7 @@ module RailsLauncher
 
       class UserModel < FileConstructor::Model
         def initialize(model, options)
-          super(model || DSL::Model.new(:user, nil))
+          super(model || FAKE_MODEL)
           @options = options
         end
 
@@ -185,8 +192,9 @@ end
         end
       end
 
-      class UserMigration < FileConstructor::FileEntity
-        def initialize(migration_id_generator, options)
+      class UserMigration < FileConstructor::Migration
+        def initialize(model, migration_id_generator, options)
+          super(model || FAKE_MODEL, @id)
           @id = migration_id_generator.next
           @options = options
         end
@@ -200,7 +208,7 @@ end
         end
 
         def columns
-          columns = []
+          columns = super()
           if @options.database_authenticatable?
             columns << 't.string :email, :null => false, :default => ""'
             columns << 't.string :encrypted_password, :null => false, :default => ""'
@@ -248,7 +256,7 @@ end
         end
 
         def indices
-          indices = []
+          indices = super()
 
           if @options.database_authenticatable?
             indices << 'add_index :users, :email, :unique => true'
@@ -274,10 +282,6 @@ end
             indices << 'add_index :users, :uid, :unique => true'
           end
           indices
-        end
-
-        def indent(lines, depth)
-          lines.map{ |l| ' ' * depth + l }.join("\n")
         end
 
         def file_content

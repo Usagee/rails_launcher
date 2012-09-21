@@ -133,6 +133,11 @@ model(:user) { string :nickname }
         subject(:file) { content_of_file('app/models/user.rb') }
         it { should include_in_line 'attr_accessible', ':nickname', ':email' }
       end
+
+      describe 'db/migrate/xxx_devise_create_users.rb' do
+        subject(:file) { content_of_file('db/migrate/\d*_devise_create_users.rb') }
+        it { should match_line 't.string :nickname' }
+      end
     end
   end
 end

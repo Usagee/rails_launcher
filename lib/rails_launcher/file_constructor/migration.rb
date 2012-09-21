@@ -13,10 +13,11 @@ class RailsLauncher::FileConstructor
 class Create#{class_table_name} < ActiveRecord::Migration
   def change
     create_table :#{@model.table_name} do |t|
-#{ columns }
+#{ indent(columns, 6) }
       t.timestamps
     end
-#{ indices }  end
+#{ indent(indices, 4) }
+  end
 end
 RUBY
     end
@@ -26,14 +27,17 @@ RUBY
       @model.name.to_s.classify.pluralize
     end
 
-    def columns
-      base = @model.fields.map { |f| ' ' * 6 + "t.#{f[0]} :#{f[1]}" }.join "\n"
+    def indent(lines, depth)
+      lines.map{ |l| ' ' * depth + l }.join("\n")
+    end
 
-      base += belonging_relations.map { |rel| "\n      t.references :#{rel[1]}" }.join ''
+    def columns
+      @model.fields.map { |f| "t.#{f[0]} :#{f[1]}" } +
+        belonging_relations.map { |rel| "t.references :#{rel[1]}" }
     end
 
     def indices
-      belonging_relations.map { |rel| "    add_index :#{@model.table_name}, :#{rel[1]}_id\n" }.join ''
+      belonging_relations.map { |rel| "add_index :#{@model.table_name}, :#{rel[1]}_id" }
     end
 
     def belonging_relations

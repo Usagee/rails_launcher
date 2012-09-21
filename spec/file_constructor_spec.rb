@@ -19,7 +19,7 @@ RUBY
     end
 
     it 'should create a migration file for users table' do
-      expect(content_of_file('db/migrate/001_create_users.rb')).to eq <<RUBY
+      expect(content_of_file('db/migrate/001_create_users.rb').gsub(/\n+/, "\n")).to eq <<RUBY
 class CreateUsers < ActiveRecord::Migration
   def change
     create_table :users do |t|
