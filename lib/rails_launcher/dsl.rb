@@ -18,7 +18,7 @@ module RailsLauncher
         @models = []
         @controllers = []
         @plugins = []
-        @application_name = 'YOUR_APPLICATION_NAME'
+        @application_name = 'your_application_name'
       end
 
       def application(name)

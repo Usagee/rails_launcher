@@ -43,11 +43,7 @@ module RailsLauncher
     end
 
     def routes_rb
-      if @world.route_definition
-        [Routes.new(@world.route_definition, @world.application_name)]
-      else
-        []
-      end
+      [Routes.new(@world.route_definition, @world.application_name)]
     end
 
     def views

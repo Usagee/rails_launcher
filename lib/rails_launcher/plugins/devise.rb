@@ -58,11 +58,25 @@ module RailsLauncher
       end
 
       def process(world, files)
-        files + static_files + initializer
+        model(route(files)) + static_files + initializer
       end
 
       def static_files
         [Locale.new(:ja), Locale.new(:en)]
+      end
+
+      def route(files)
+        routes_rb = files.find { |f| f.path == 'config/routes.rb' }
+        routes_rb.additional << 'devise_for :users'
+        files
+      end
+
+      def model(files)
+        if files.find { |f| f.path == 'app/models/user.rb' }
+          files
+        else
+          files << UserModel.new(@options)
+        end
       end
 
       def initializer
@@ -90,6 +104,29 @@ module RailsLauncher
 
         def file_content
           File.read(FILES.call("locale.#{@locale}.yml"))
+        end
+      end
+
+      class UserModel < FileConstructor::FileEntity
+        def initialize(options)
+          @options = options
+        end
+
+        def path
+          'app/models/user.rb'
+        end
+
+        def modules
+          @options.keys.map { |key| key.to_sym.inspect }.join(", ")
+        end
+
+        def file_content
+            %Q{
+class User < ActiveRecord::Base
+  devise #{modules}
+  attr_accessible :email, :password, :password_confirmation
+end
+}
         end
       end
     end

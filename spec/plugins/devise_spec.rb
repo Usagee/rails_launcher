@@ -21,5 +21,21 @@ plugin '#{ devise_path }', database_authenticatable: true
       it { should create_file 'config/locales/devise.ja.yml' }
       it { should create_file 'config/locales/devise.en.yml' }
     end
+
+    describe 'database_authenticatable' do
+      let(:world) { DSL.new_world %Q{
+plugin '#{ devise_path }', database_authenticatable: true
+}}
+
+      describe 'app/models/user.rb' do
+        subject(:file) { content_of_file('app/models/user.rb') }
+        it { should match_line 'devise :database_authenticatable' }
+      end
+
+      describe 'config/routes.rb' do
+        subject(:file) { content_of_file('config/routes.rb') }
+        it { should match_line 'devise_for :users' }
+      end
+    end
   end
 end
