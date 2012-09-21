@@ -41,7 +41,7 @@ module RailsLauncher::Plugin
       @root_path = options[:root_path] || 'test/factories'
     end
 
-    def process(world, files)
+    def process(world, files, migration_id_generator)
       files + factories(world)
     end
 

@@ -57,7 +57,8 @@ module RailsLauncher
         @options = options
       end
 
-      def process(world, files)
+      def process(world, files, migration_id_generator)
+        @migration_id_generator = migration_id_generator
         model(route(files)) + static_files + initializer
       end
 
@@ -75,7 +76,7 @@ module RailsLauncher
         if files.find { |f| f.path == 'app/models/user.rb' }
           files
         else
-          files << UserModel.new(@options)
+          files << UserModel.new(@options) << UserMigration.new(@migration_id_generator, @options)
         end
       end
 
@@ -125,6 +126,36 @@ module RailsLauncher
 class User < ActiveRecord::Base
   devise #{modules}
   attr_accessible :email, :password, :password_confirmation
+end
+}
+        end
+      end
+
+      class UserMigration < FileConstructor::FileEntity
+        def initialize(migration_id_generator, options)
+          @id = migration_id_generator.next
+          @options = options
+        end
+
+        def path
+          "db/migrate/#{@id}_devise_create_users.rb"
+        end
+
+        def modules
+          @options.keys.map { |key| key.to_sym.inspect }.join(", ")
+        end
+
+        def file_content
+            %Q{
+class DeviseCreateUsers < ActiveRecord::Migration
+  def change
+    create_table(:users) do |t|
+      t.string :email, :null => false, :default => ""
+      t.string :encrypted_password, :null => false, :default => ""
+    end
+
+    add_index :users, :email, :unique => true
+  end
 end
 }
         end

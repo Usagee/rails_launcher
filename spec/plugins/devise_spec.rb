@@ -36,6 +36,14 @@ plugin '#{ devise_path }', database_authenticatable: true
         subject(:file) { content_of_file('config/routes.rb') }
         it { should match_line 'devise_for :users' }
       end
+
+      describe 'db/migrate/xxx_devise_create_users.rb' do
+        subject(:file) { content_of_file('db/migrate/\d*_devise_create_users.rb') }
+        it { should match_line 't.string :email, :null => false, :default => ""' }
+        it { should match_line 't.string :encrypted_password, :null => false, :default => ""' }
+        it { should match_line 'add_index :users, :email, :unique => true' }
+        it { should_not match_line 't.datetime :remember_created_at'  }
+      end
     end
   end
 end

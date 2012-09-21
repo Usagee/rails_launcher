@@ -5,7 +5,7 @@ class RailsLauncher::FileConstructor
     end
 
     def path
-      "db/migrate/%03d_create_%s.rb" % [@id, @model.table_name]
+      "db/migrate/%03d_create_%s.rb" % [@id.next, @model.table_name]
     end
 
     def file_content
