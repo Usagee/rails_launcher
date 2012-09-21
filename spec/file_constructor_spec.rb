@@ -1,12 +1,5 @@
 require 'spec_helper'
 
-# Expect that actual contains a line matching expected
-RSpec::Matchers.define :match_line do |expected|
-  match do |actual|
-    actual.split("\n").map(&:strip).any? { |line| line.match expected }
-  end
-end
-
 describe RailsLauncher::FileConstructor do
   let(:world) { sample_world(world_name) }
 
@@ -26,7 +19,7 @@ RUBY
     end
 
     it 'should create a migration file for users table' do
-      expect(content_of_file('db/migrate/001_create_users.rb')).to eq <<RUBY
+      expect(content_of_file('db/migrate/001_create_users.rb').gsub(/\n+/, "\n")).to eq <<RUBY
 class CreateUsers < ActiveRecord::Migration
   def change
     create_table :users do |t|
@@ -168,6 +161,12 @@ RUBY
 
       it { should match 'IndexOnlyApplication::Application.routes' }
       it { should match_line 'root {:to=>"welcome#index"}' }
+    end
+
+    context 'when no routing is explicitly defined' do
+      let(:world_name) { 'simple' }
+      subject { content_of_file('config/routes.rb') }
+      it { should match 'YourApplicationName::Application.routes' }
     end
   end
 end

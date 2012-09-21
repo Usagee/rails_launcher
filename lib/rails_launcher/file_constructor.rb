@@ -4,12 +4,13 @@ require 'rails_launcher/file_constructor/migration'
 require 'rails_launcher/file_constructor/controller'
 require 'rails_launcher/file_constructor/routes'
 require 'rails_launcher/file_constructor/view'
+require 'rails_launcher/file_constructor/migration_id_generator'
 
 module RailsLauncher
   class FileConstructor
     def initialize(world)
       @world = world
-      @migration_id = 0
+      @migration_id_generator = MigrationIdGenerator.new(1)
     end
 
     # Plugins extend generated core files
@@ -17,7 +18,7 @@ module RailsLauncher
     # then return modified files.
     def file_entities
       @world.plugins.reduce(core_file_entities) do |files, plugin|
-        plugin.process(@world, files)
+        plugin.process(@world, files, @migration_id_generator)
       end
     end
 
@@ -34,7 +35,7 @@ module RailsLauncher
     end
 
     def migrations
-      @world.models.map { |m| Migration.new(m, @migration_id += 1) }
+      @world.models.map { |m| Migration.new(m, @migration_id_generator) }
     end
 
     def controllers
@@ -43,11 +44,7 @@ module RailsLauncher
     end
 
     def routes_rb
-      if @world.route_definition
-        [Routes.new(@world.route_definition, @world.application_name)]
-      else
-        []
-      end
+      [Routes.new(@world.route_definition, @world.application_name)]
     end
 
     def views

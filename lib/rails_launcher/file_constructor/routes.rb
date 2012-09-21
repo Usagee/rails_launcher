@@ -1,8 +1,11 @@
 class RailsLauncher::FileConstructor
   class Routes < FileEntity
+    attr_accessor :additional
+
     def initialize(definition, name)
       @definition = definition
       @name = name
+      @additional = []
     end
 
     def path
@@ -17,6 +20,7 @@ class RailsLauncher::FileConstructor
 
 #{root}
 #{matches}
+#{@additional.join("\n")}
 end
 }.lstrip
     end
@@ -24,7 +28,7 @@ end
     private
 
     def root
-      if r = @definition.root
+      if r = @definition.try(:root)
         "root #{r.code}\n"
       else
         ""
@@ -32,7 +36,9 @@ end
     end
 
     def matches
-      @definition.matches.map { |m| "matches #{m.code}" }.join("\n")
+      if @definition && @definition.matches
+        @definition.matches.map { |m| "matches #{m.code}" }.join("\n")
+      end
     end
 
     def application_class_name
