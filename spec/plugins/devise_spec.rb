@@ -67,6 +67,7 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         subject(:file) { content_of_file('db/migrate/\d*_devise_create_users.rb') }
         it { should match_line 't.string :provider' }
         it { should match_line 't.string :uid' }
+        it { should match_line 'add_index :users, :uid' }
       end
 
       describe 'config/initializers/devise.rb' do

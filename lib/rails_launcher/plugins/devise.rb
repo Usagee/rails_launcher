@@ -237,8 +237,40 @@ end
             columns << 't.string :provider'
             columns << 't.string :uid'
           end
+          columns
+        end
 
-          columns.map { |s| ' ' * 6 + s }.join("\n")
+        def indices
+          indices = []
+
+          if @options.database_authenticatable?
+            indices << 'add_index :users, :email, :unique => true'
+          end
+
+          if @options.recoverable?
+            indices << 'add_index :users, :reset_password_token, :unique => true'
+          end
+
+          if @options.confirmable?
+            indices << 'add_index :users, :confirmation_token, :unique => true'
+          end
+
+          if @options.lockable?
+            indices << 'add_index :users, :unlock_token, :unique => true'
+          end
+
+          if @options.token_authenticatable?
+            indices << 'add_index :users, :authentication_token, :unique => true'
+          end
+
+          if @options.omniauthable?
+            indices << 'add_index :users, :uid, :unique => true'
+          end
+          indices
+        end
+
+        def indent(lines, depth)
+          lines.map{ |l| ' ' * depth + l }.join("\n")
         end
 
         def file_content
@@ -246,12 +278,12 @@ end
 class DeviseCreateUsers < ActiveRecord::Migration
   def change
     create_table(:users) do |t|
-#{columns}
+#{indent(columns, 6)}
 
       t.timestamp
     end
 
-    add_index :users, :email, :unique => true
+#{indent(indices, 4)}
   end
 end
 }
