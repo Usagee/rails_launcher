@@ -29,7 +29,7 @@ end
 
     def root
       if r = @definition.try(:root)
-        "root #{r.code}\n"
+        "root(#{r.code})\n"
       else
         ""
       end
@@ -42,7 +42,8 @@ end
     end
 
     def application_class_name
-      @name.classify
+      # classify works incorrectly when name ends with 's'
+      @name.camelize
     end
   end
 end
