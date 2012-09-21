@@ -84,6 +84,16 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
 
         it { should include_in_line 'devise_for', ':omniauth_callbacks => "users/omniauth_callbacks"' }
       end
+
+      describe 'app/controllers/users/omniauth_callbacks_conroller.rb' do
+        subject(:file) { content_of_file('app/controllers/users/omniauth_callbacks_conroller.rb') }
+
+        it { should include 'class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController' }
+        it { should include 'def twitter' }
+        it { should include 'def facebook' }
+        it { should include 'User.find_for_oauth' }
+        it { should include 'flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Twitter"' }
+      end
     end
 
     describe 'mailer_sender config in initializer' do

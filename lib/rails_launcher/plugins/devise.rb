@@ -59,7 +59,7 @@ module RailsLauncher
 
       def process(world, files, migration_id_generator)
         @migration_id_generator = migration_id_generator
-        model(route(files)) + static_files + initializer
+        model(route(files)) + static_files + initializer + omniauth_controller
       end
 
       def static_files
@@ -87,6 +87,10 @@ module RailsLauncher
 
       def initializer
         [Initializer.new(@options)]
+      end
+
+      def omniauth_controller
+        @options.omniauthable? ? [OmniauthController.new(@options)] : []
       end
 
       class Locale < FileConstructor::FileEntity
@@ -322,6 +326,44 @@ end
 
         def mailer_sender
           @options.mailer_sender
+        end
+      end
+
+      class OmniauthController
+        def initialize(options)
+          @options = options
+        end
+
+        def path
+          'app/controllers/users/omniauth_callbacks_conroller.rb'
+        end
+
+        def provider_methods
+          @options.omniauth_providers.map{ |provider| method(provider) }.join("\n")
+        end
+
+        def method(provider)
+          %Q{
+  def #{provider}
+    # You need to implement the method below in your model (e.g. app/models/user.rb)
+    @user = User.find_for_oauth(request.env["omniauth.auth"], current_user)
+
+    if @user
+      flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "#{provider.capitalize}"
+      sign_in_and_redirect @user, :event => :authentication
+    else
+      redirect_to new_user_registration_url
+    end
+  end
+}
+        end
+
+        def file_content
+          %Q{
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+#{ provider_methods }
+end
+}.lstrip
         end
       end
     end
