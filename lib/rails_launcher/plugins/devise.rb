@@ -54,7 +54,7 @@ module RailsLauncher
       FILES = lambda { |name| File.join(__FILE__, "../devise/#{name}") }
 
       def initialize(options = {})
-        @options = options
+        @options = Option.new(options)
       end
 
       def process(world, files, migration_id_generator)
@@ -108,6 +108,25 @@ module RailsLauncher
         end
       end
 
+      class Option
+        def initialize(hash)
+          @hash = hash
+        end
+
+        [:database_authenticatable, :registerable, :recoverable, :rememberable,
+          :trackable, :validatable, :token_authenticatable, :confirmable,
+          :lockable, :timeoutable, :omniauthable].each do |mod|
+            define_method("#{mod}?") { !! @hash[mod] }
+        end
+
+        def modules
+          @hash.keys
+          [:database_authenticatable, :registerable, :recoverable, :rememberable,
+          :trackable, :validatable, :token_authenticatable, :confirmable,
+          :lockable, :timeoutable, :omniauthable] & @hash.keys
+        end
+      end
+
       class UserModel < FileConstructor::FileEntity
         def initialize(options)
           @options = options
@@ -118,11 +137,11 @@ module RailsLauncher
         end
 
         def modules
-          @options.keys.map { |key| key.to_sym.inspect }.join(", ")
+          @options.modules.map(&:inspect).join(", ")
         end
 
         def omniauth_method
-          if @options[:omniauthable]
+          if @options.omniauthable?
             %Q{def self.find_for_oauth(auth, sign_in_resource = nil)
     user = User.where(:provider => auth.provider, :uid => auth.uid).first
     unless user
@@ -162,13 +181,63 @@ end
           @options.keys.map { |key| key.to_sym.inspect }.join(", ")
         end
 
+        def columns
+          columns = []
+          if @options.database_authenticatable?
+            columns << 't.string :email, :null => false, :default => ""'
+            columns << 't.string :encrypted_password, :null => false, :default => ""'
+          end
+
+          if @options.recoverable?
+            columns << 't.string   :reset_password_token'
+            columns << 't.datetime :reset_password_sent_at'
+          end
+
+          if @options.rememberable?
+            columns << 't.datetime :remember_created_at'
+          end
+
+          if @options.trackable?
+            columns << 't.integer  :sign_in_count, :default => 0'
+            columns << 't.datetime :current_sign_in_at'
+            columns << 't.datetime :last_sign_in_at'
+            columns << 't.string   :current_sign_in_ip'
+            columns << 't.string   :last_sign_in_ip'
+          end
+
+          if @options.confirmable?
+            columns << 't.string   :confirmation_token'
+            columns << 't.datetime :confirmed_at'
+            columns << 't.datetime :confirmation_sent_at'
+            columns << 't.string   :unconfirmed_email # Only if using reconfirmable'
+          end
+
+          if @options.lockable?
+            columns << 't.integer  :failed_attempts, :default => 0 # Only if lock strategy is :failed_attempts'
+            columns << 't.string   :unlock_token # Only if unlock strategy is :email or :both'
+            columns << 't.datetime :locked_at'
+          end
+
+          if @options.token_authenticatable?
+            columns << 't.string :authentication_token'
+          end
+
+          if @options.omniauthable?
+            columns << 't.string :provider'
+            columns << 't.string :uid'
+          end
+
+          columns.map { |s| ' ' * 6 + s }.join("\n")
+        end
+
         def file_content
             %Q{
 class DeviseCreateUsers < ActiveRecord::Migration
   def change
     create_table(:users) do |t|
-      t.string :email, :null => false, :default => ""
-      t.string :encrypted_password, :null => false, :default => ""
+#{columns}
+
+      t.timestamp
     end
 
     add_index :users, :email, :unique => true

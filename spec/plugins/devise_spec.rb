@@ -56,6 +56,12 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         it { should include ':omniauthable' }
         it { should include 'def self.find_for_oauth(auth, sign_in_resource = nil)' }
       end
+
+      describe 'db/migrate/xxx_devise_create_users.rb' do
+        subject(:file) { content_of_file('db/migrate/\d*_devise_create_users.rb') }
+        it { should match_line 't.string :provider' }
+        it { should match_line 't.string :uid' }
+      end
     end
   end
 end
