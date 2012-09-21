@@ -78,6 +78,12 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         it { should include %q{config.omniauth :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET']} }
         it { should include %q{config.omniauth :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET']} }
       end
+
+      describe 'config/routes.rb' do
+        subject(:file) { content_of_file('config/routes.rb') }
+
+        it { should include_in_line 'devise_for', ':omniauth_callbacks => "users/omniauth_callbacks"' }
+      end
     end
 
     describe 'mailer_sender config in initializer' do

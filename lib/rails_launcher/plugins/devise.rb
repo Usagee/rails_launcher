@@ -68,7 +68,12 @@ module RailsLauncher
 
       def route(files)
         routes_rb = files.find { |f| f.path == 'config/routes.rb' }
-        routes_rb.additional << 'devise_for :users'
+        definition = if @options.omniauthable?
+                       'devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }'
+                     else
+                       'devise_for :users'
+                     end
+        routes_rb.additional << definition
         files
       end
 
