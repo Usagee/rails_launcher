@@ -119,6 +119,10 @@ module RailsLauncher
         def omniauth_providers
           @hash[:omniauthable] || []
         end
+
+        def mailer_sender
+          @hash[:mailer_sender] || "please-change-me-at-config-initializers-devise@example.com"
+        end
       end
 
       class UserModel < FileConstructor::FileEntity
@@ -266,9 +270,8 @@ end
           }.join("\n  ")
         end
 
-        # TODO
         def mailer_sender
-          "please-change-me-at-config-initializers-devise@example.com"
+          @options.mailer_sender
         end
       end
     end

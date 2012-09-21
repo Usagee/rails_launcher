@@ -72,5 +72,16 @@ plugin '#{ devise_path }', database_authenticatable: true, omniauthable: [:twitt
         it { should include %q{config.omniauth :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET']} }
       end
     end
+
+    describe 'mailer_sender config in initializer' do
+      let(:world) { DSL.new_world %Q{
+plugin '#{ devise_path }', database_authenticatable: true, mailer_sender: 'hello@example.com'
+}}
+
+      subject(:initializer) { content_of_file('config/initializers/devise.rb') }
+
+      it { should include 'hello@example.com' }
+      it { should_not include "please-change-me-at-config-initializers-devise@example.com" }
+    end
   end
 end
