@@ -59,7 +59,7 @@ module RailsLauncher
 
       def process(world, files, migration_id_generator)
         @migration_id_generator = migration_id_generator
-        model(route(files)) + static_files + initializer + omniauth_controller
+        model(world, route(files)) + static_files + initializer + omniauth_controller
       end
 
       def static_files
@@ -77,9 +77,9 @@ module RailsLauncher
         files
       end
 
-      def model(files)
+      def model(world, files)
         if idx = files.find_index { |f| f.path == 'app/models/user.rb' }
-          files[idx] = UserModel.new(files[idx], @options)
+          files[idx] = UserModel.new(world.find_model(:user), @options)
         else
           files << UserModel.new(nil, @options) << UserMigration.new(@migration_id_generator, @options)
         end
@@ -135,19 +135,10 @@ module RailsLauncher
         end
       end
 
-      class UserModel < FileConstructor::FileEntity
-        def initialize(existing, options)
-          if existing
-            file = existing.file_content
-            @existing_accessible_columns = file.match(/attr_accessible (.*)$/).try(:[], 1) + ", "
-          else
-            @existing_accessible_columns = ''
-          end
+      class UserModel < FileConstructor::Model
+        def initialize(model, options)
+          super(model || DSL::Model.new(:user, nil))
           @options = options
-        end
-
-        def path
-          'app/models/user.rb'
         end
 
         def modules
@@ -179,7 +170,7 @@ module RailsLauncher
             columns += [:remember_me]
           end
 
-          @existing_accessible_columns.strip + columns.map(&:inspect).join(", ")
+          (columns + properties).map(&:inspect).join(", ")
         end
 
         def file_content
@@ -187,7 +178,7 @@ module RailsLauncher
 class User < ActiveRecord::Base
   devise #{modules}
   attr_accessible #{accessible_columns}
-
+#{ relations }#{ validations }
   #{omniauth_method}
 end
 }
